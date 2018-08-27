@@ -1,0 +1,16 @@
+{
+    "require": {
+        "tracy/tracy": "^2.5",
+        "latte/latte": "^2.4",
+        "nette/utils": "^2.5",
+        "nette/security": "^2.4",
+        "nette/robot-loader": "^3.0",
+        "nette/http": "^2.4",
+        "nette/forms": "^2.4",
+        "nette/di": "^2.4",
+        "nette/bootstrap": "^2.4",
+        "nette/application": "^2.4",
+        "google/cloud-datastore": "^1.5",
+        "firebase/php-jwt": "^5.0"
+    }
+}

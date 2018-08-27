@@ -1,0 +1,21 @@
+parameters:
+	google:
+		credentialsFile: %appDir%/Config/google-cloud-credentials.json
+	todoist:
+		clientId: 0fbc086bd26340e69669610e54878bef
+		clientSecret: {put-secret-here}
+
+
+application:
+#	errorPresenter: Error
+	mapping:
+		*: App\*Module\Presenters\*Presenter
+
+session:
+	expiration: 14 days
+
+services:
+	- App\Model\Todoist\Authorizator(%todoist.clientId%, %todoist.clientSecret%)
+	- App\Model\DatastoreFactory(%google.credentialsFile%)
+	- App\Model\CookieAuth
+	router: App\Router\RouterFactory::create
