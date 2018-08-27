@@ -131,9 +131,9 @@ class CookieAuth
      */
     private function validate($userId): void
     {
-        $mask = sprintf('/^[%s]{%d}$/D', preg_quote(static::ID_CHARLIST, '/'), static::ID_LENGTH);
+        $mask = sprintf('/^[%s]{%d}$/D', static::ID_CHARLIST, static::ID_LENGTH);
         if (!preg_match($mask, $userId)) {
-            throw new InvalidUserIdException(sprintf('UserID "%s" has invalid format', $userId));
+            throw new InvalidUserIdException(sprintf('UserID "%s" has invalid format, must match this mask: %s', $userId, $mask));
         }
     }
 }

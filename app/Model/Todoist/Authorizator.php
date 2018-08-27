@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
+use RuntimeException;
 
 class Authorizator
 {
@@ -39,7 +40,7 @@ class Authorizator
      * @return string
      * @throws \Nette\Utils\JsonException
      */
-    public function getLoginUrl(string $csrfToken, array $stateData = []): string
+    public function getLoginUrl(string $csrfToken, array $stateData = [], ?string $redirect_uri = null): string
     {
         $state = [
             'csrf' => $csrfToken,
@@ -51,6 +52,10 @@ class Authorizator
             'scope' => static::SCOPE,
             'state' => $this->urlsafeB64Encode(Json::encode($state)),
         ];
+
+        if ($redirect_uri !== null) {
+            $params['redirect_uri'] = $redirect_uri;
+        }
 
         return sprintf('%s?%s', static::API_AUTH_URL, http_build_query($params));
     }
@@ -73,7 +78,6 @@ class Authorizator
      * @param string $urlState State parametr from URL
      * @return AuthorizationResponse
      * @throws AuthorizationException
-     * @throws TokenExchangeException
      * @throws \RuntimeException
      */
     public function getAccessToken(string $csrfToken, string $urlCode, string $urlState): AuthorizationResponse
@@ -133,8 +137,7 @@ class Authorizator
     /**
      * @param string $code
      * @return string
-     * @throws TokenExchangeException
-     * @throws \RuntimeException
+     * @throws AuthorizationException
      */
     private function exchangeCode(string $code): string
     {
@@ -162,8 +165,8 @@ class Authorizator
             throw new TokenExchangeException('Error during call API', $e->getCode(), $e);
         } catch (JsonException $e) {
             throw new TokenExchangeException('API response is invalid JSON', $e->getCode(), $e);
+        } catch (RuntimeException $e) {
+            throw new TokenExchangeException('Unable to get API response', $e->getCode(), $e);
         }
     }
-
-
 }

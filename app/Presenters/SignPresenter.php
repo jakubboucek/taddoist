@@ -3,9 +3,12 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
+use App\Model\CookieAuth;
+use App\Model\DatastoreFactory;
 use App\Model\Todoist\Authorizator;
 use Nette\Application\UI\Presenter;
 use Nette\Http\IResponse;
+use Nette\Utils\DateTime;
 use Nette\Utils\Random;
 
 class SignPresenter extends Presenter
@@ -21,14 +24,26 @@ class SignPresenter extends Presenter
      * @var Authorizator
      */
     private $todoistAuthorizator;
+    /**
+     * @var CookieAuth
+     */
+    private $cookieAuth;
+    /**
+     * @var DatastoreFactory
+     */
+    private $datastoreFactory;
 
 
     /**
-     * @param Authorizator $todoistAuthorizator
+     * @param Authorizator $todoist
+     * @param CookieAuth $cookie
+     * @param DatastoreFactory $datastore
      */
-    public function __construct(Authorizator $todoistAuthorizator)
+    public function __construct(Authorizator $todoist, CookieAuth $cookie, DatastoreFactory $datastore)
     {
-        $this->todoistAuthorizator = $todoistAuthorizator;
+        $this->todoistAuthorizator = $todoist;
+        $this->cookieAuth = $cookie;
+        $this->datastoreFactory = $datastore;
         parent::__construct();
     }
 
@@ -39,7 +54,9 @@ class SignPresenter extends Presenter
     public function actionTodoist(): void
     {
         $token = $this->createCsrfToken();
-        $url = $this->todoistAuthorizator->getLoginUrl($token, ['backlink' => $this->backlink]);
+
+        $redirect_url = $this->link('//Sign:actionTodoistCallback');
+        $url = $this->todoistAuthorizator->getLoginUrl($token, ['backlink' => $this->backlink], $redirect_url);
         $this->redirectUrl($url);
     }
 
@@ -48,12 +65,13 @@ class SignPresenter extends Presenter
      * @param null|string $state
      * @param null|string $code
      * @param null|string $error
+     * @return \App\Model\Todoist\AuthorizationResponse
      * @throws \App\Model\Todoist\AuthorizationException
      * @throws \App\Model\Todoist\TokenExchangeException
      * @throws \Nette\Application\BadRequestException
      * @throws \RuntimeException
      */
-    public function actionTodoistCallback(?string $state = null, ?string $code = null, ?string $error = null): void
+    public function actionTodoistCallback(?string $state = null, ?string $code = null, ?string $error = null): \App\Model\Todoist\AuthorizationResponse
     {
         if (\is_string($error)) {
             $this->handleTodoistError($error);
@@ -66,7 +84,26 @@ class SignPresenter extends Presenter
         $token = $this->getCsrfToken();
         $auth = $this->todoistAuthorizator->getAccessToken($token, $code, $state);
 
+        if(isset($auth->getStateData()['backlink'])) {
+            $this->backlink = $auth->getStateData()['backlink'];
+        }
 
+        $userId = $this->cookieAuth->register();
+
+        $datastore = $this->datastoreFactory->create($userId);
+
+        $entity = $datastore->entity($datastore->key('UserData', 'session'), [
+            'access_token' => $auth->getAccesToken(),
+            'created' => new DateTime(),
+        ]);
+
+        $datastore->insert($entity);
+        
+        //clean
+        $this->removeCsrfToken();
+
+        $this->restoreRequest($this->backlink);
+        $this->redirect('Homepage:default');
     }
 
 
@@ -99,5 +136,11 @@ class SignPresenter extends Presenter
     private function getCsrfToken()
     {
         return $this->getHttpRequest()->getCookie(static::CSRF_TOKEN_COOKIE);
+    }
+
+
+    private function removeCsrfToken()
+    {
+        $this->getHttpResponse()->deleteCookie(static::CSRF_TOKEN_COOKIE);
     }
 }
