@@ -23,12 +23,15 @@ class DatastoreFactory
      * @param string $namespace Partitions data under a namespace. Useful for Multitenant Projects.
      * @return DatastoreClient
      */
-    public function create(string $namespace): DatastoreClient
+    public function create(?string $namespace = null): DatastoreClient
     {
         $config = [
             'keyFilePath' => $this->googleCredentialsFilename,
-            'namespaceId' => $namespace,
         ];
+
+        if($namespace) {
+            $config['namespaceId'] = $namespace;
+        }
 
         return new DatastoreClient($config);
     }

@@ -1,4 +1,6 @@
 parameters:
+	session:
+		namespace: sessions
 	google:
 		credentialsFile: %appDir%/Config/google-cloud-credentials.json
 	todoist:
@@ -17,9 +19,14 @@ http:
 
 session:
 	expiration: 14 days
+	save_path: %session.namespace% # datastore namespace
+	name: AppSession # datastore kind
 
 services:
 	- App\Model\Todoist\Authorizator(%todoist.clientId%, %todoist.clientSecret%)
-	- App\Model\DatastoreFactory(%google.credentialsFile%)
 	- App\Model\CookieAuth
 	router: App\Router\RouterFactory::create
+	datastoreFactory: App\Model\DatastoreFactory(%google.credentialsFile%)
+	session:
+		setup:
+			- setHandler(Google\Cloud\Datastore\DatastoreSessionHandler(@datastoreFactory::create(%session.namespace%)))
