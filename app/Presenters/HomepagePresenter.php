@@ -9,6 +9,6 @@ class HomepagePresenter extends Presenter
 {
     public function renderDefault()
     {
-//        $this->sendJson('ok');
+
     }
 }

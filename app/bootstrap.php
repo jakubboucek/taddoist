@@ -8,8 +8,6 @@ $configurator = new \Nette\Configurator();
 $configurator->setDebugMode(true);
 $configurator->enableDebugger();
 
-bdump(sys_get_temp_dir());
-
 $configurator->setTimeZone('Europe/Prague');
 $configurator->setTempDirectory(sys_get_temp_dir());
 $configurator->createRobotLoader()->addDirectory(__DIR__)->register();
