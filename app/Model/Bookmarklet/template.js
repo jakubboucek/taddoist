@@ -1,0 +1,1 @@
+!function(e,n,t){const p=new URL(n),o=p.searchParams;o.append("href",e.href),o.append("title",document.title),t&&o.append("projectId",t),e.href=p.href}(location,$__endpoint__,$__projectId__);

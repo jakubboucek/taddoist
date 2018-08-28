@@ -15,20 +15,20 @@ module.exports = function(grunt) {
             }
         },
         uglify: {
-            options: {
-                banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-            },
-            build: {
-                src: 'src/<%= pkg.name %>.js',
-                dest: 'build/<%= pkg.name %>.min.js'
+            main: {
+                files: {
+                    'app/Model/Bookmarklet/template.js': [
+                        'assets/bookmarklet-dev/source.js',
+                    ]
+                }
             }
         }
     });
 
-    // grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-contrib-less');
 
     // Default task(s).
-    grunt.registerTask('default', ['less']);
+    grunt.registerTask('default', ['less', 'uglify']);
 
 };
