@@ -59,6 +59,13 @@ class SignPresenter extends Presenter
     }
 
 
+    public function actionOut()
+    {
+        $this->user->logout(true);
+        $this->redirect('Homepage:');
+    }
+
+
     /**
      * @throws \Nette\Application\UI\InvalidLinkException
      * @throws \Nette\Utils\JsonException
@@ -115,7 +122,7 @@ class SignPresenter extends Presenter
         $this->removeCsrfToken();
 
         $this->restoreRequest($this->backlink);
-        $this->redirect('Homepage:default');
+        $this->redirect('Homepage:');
     }
 
 
@@ -174,7 +181,7 @@ class SignPresenter extends Presenter
         $this->removeCsrfToken();
 
         $this->restoreRequest($this->backlink);
-        $this->redirect('Homepage:default');
+        $this->redirect('Homepage:');
     }
 
 
