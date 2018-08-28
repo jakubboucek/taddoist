@@ -62,6 +62,9 @@ class SignPresenter extends Presenter
     public function actionOut()
     {
         $this->user->logout(true);
+
+        $this->flashMessage('Byli jste odhlášeni', 'success');
+
         $this->redirect('Homepage:');
     }
 
@@ -121,6 +124,8 @@ class SignPresenter extends Presenter
         //clean
         $this->removeCsrfToken();
 
+        $this->flashMessage('Aplikace Taddoist je nyní připojena na Váš Todoist', 'success');
+
         $this->restoreRequest($this->backlink);
         $this->redirect('Homepage:');
     }
@@ -179,6 +184,8 @@ class SignPresenter extends Presenter
         $this->user->login($authorization);
 
         $this->removeCsrfToken();
+
+        $this->flashMessage(sprintf('Nyní jste přihlášeni pod e-mailem: %s, toto přihlášení by mělo zůstat aktivní 30 dní.', $this->user->id), 'success');
 
         $this->restoreRequest($this->backlink);
         $this->redirect('Homepage:');

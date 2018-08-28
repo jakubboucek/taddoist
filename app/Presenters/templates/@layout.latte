@@ -50,11 +50,11 @@
                         <i class="glyphicon glyphicon-user"></i> {$user->id}
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" n:href="Sign:out">Odhlásit</a>
+                        <a class="nav-link" n:href=":Sign:out">Odhlásit</a>
                     </li>
                 {else}
                     <li class="nav-item">
-                        <a class="nav-link" n:href="Sign:google"><i class="glyphicon glyphicon-user"></i> Přihlásit Googlem</a>
+                        <a class="nav-link" n:href=":Sign:google"><i class="glyphicon glyphicon-user"></i> Přihlásit Googlem</a>
                     </li>
                 {/if}
             </ul>
@@ -77,5 +77,13 @@
 
     {include content}
 </div>
+<footer>
+    <div class="text-center">© 2018
+        <a href="https://www.jakub-boucek.cz/"> Jakub Bouček</a> |
+        <a href="{link :Homepage:privacy}">Ochrana osobních údajů</a> |
+        <a href="https://github.com/jakubboucek/taddoist">GitHub</a> |
+        <a href="https://github.com/jakubboucek/taddoist/issues?q=is%3Aissue">Hlášení chyb</a>
+    </div>
+</footer>
 </body>
 </html>
