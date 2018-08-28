@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>{ifset title}{include title|stripHtml} | {/ifset} Taddoist</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link rel="shortcut icon" href="{$basePath}/static/favicon.ico" type="image/x-icon">
+
+</head>
+
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" n:href=":Homepage:"><img alt="Brand" src="{$basePath}/static/favicon-16x16.png"> Taddoist</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                {*<li class="{ifCurrent Dashboard:* }active{/ifCurrent}">
+                    <a n:href="Dashboard:">Dashboard</a>
+                </li>
+                <li class="{ifCurrent Field:* }active{/ifCurrent}">
+                    <a n:href="Field:">Obory</a>
+                </li>
+                <li class="{ifCurrent User:* }active{/ifCurrent}">
+                    <a n:href="User:">Uživatelé</a>
+                </li>
+                <li class="{ifCurrent Log:* }active{/ifCurrent}">
+                    <a n:href="Log:">Logy</a>
+                </li>*}
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                {if $user->loggedIn}
+                    <li class="navbar-text">
+                        <i class="glyphicon glyphicon-user"></i> {$user->id}
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" n:href="Sign:out">Odhlásit</a>
+                    </li>
+                {else}
+                    <li class="nav-item">
+                        <a class="nav-link" n:href="Sign:google"><i class="glyphicon glyphicon-user"></i> Přihlásit Googlem</a>
+                    </li>
+                {/if}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>
+            {ifset title}{include title}{/ifset}
+            {ifset subtitle}<small>{include subtitle}</small>{/ifset}
+        </h1>
+    </div>
+
+    {foreach $flashes as $flash}
+        {var $flashClass = "alert-" . $flash->type}
+        <div n:class="alert, $flashClass" role="alert">{$flash->message}</div>
+    {/foreach}
+
+    {include content}
+</div>
+</body>
+</html>
