@@ -13,7 +13,12 @@
 .git
 .gitignore
 .idea
+assets/
+Gruntfile.js
 /index.php
+node_modules/
+package.json
+package-lock.json
 temp/
 
 # PHP Composer dependencies:
