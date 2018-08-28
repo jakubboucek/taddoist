@@ -5,7 +5,8 @@ namespace App\Presenters;
 
 use App\Model\CookieAuth;
 use App\Model\DatastoreFactory;
-use App\Model\Todoist\Authorizator;
+use App\Model\Google;
+use App\Model\Todoist;
 use Nette\Application\UI\Presenter;
 use Nette\Http\IResponse;
 use Nette\Utils\DateTime;
@@ -21,9 +22,9 @@ class SignPresenter extends Presenter
      */
     public $backlink;
     /**
-     * @var Authorizator
+     * @var Todoist\Authenticator
      */
-    private $todoistAuthorizator;
+    private $todoistAuthenticator;
     /**
      * @var CookieAuth
      */
@@ -32,16 +33,26 @@ class SignPresenter extends Presenter
      * @var DatastoreFactory
      */
     private $datastoreFactory;
+    /**
+     * @var Google\Authenticator
+     */
+    private $googleAuthenticator;
 
 
     /**
-     * @param Authorizator $todoist
+     * @param Todoist\Authenticator $todoist
+     * @param Google\Authenticator $google
      * @param CookieAuth $cookie
      * @param DatastoreFactory $datastore
      */
-    public function __construct(Authorizator $todoist, CookieAuth $cookie, DatastoreFactory $datastore)
-    {
-        $this->todoistAuthorizator = $todoist;
+    public function __construct(
+        Todoist\Authenticator $todoist,
+        Google\Authenticator $google,
+        CookieAuth $cookie,
+        DatastoreFactory $datastore
+    ) {
+        $this->todoistAuthenticator = $todoist;
+        $this->googleAuthenticator = $google;
         $this->cookieAuth = $cookie;
         $this->datastoreFactory = $datastore;
         parent::__construct();
@@ -49,6 +60,7 @@ class SignPresenter extends Presenter
 
 
     /**
+     * @throws \Nette\Application\UI\InvalidLinkException
      * @throws \Nette\Utils\JsonException
      */
     public function actionTodoist(): void
@@ -56,7 +68,7 @@ class SignPresenter extends Presenter
         $token = $this->createCsrfToken();
 
         $redirect_url = $this->link('//Sign:actionTodoistCallback');
-        $url = $this->todoistAuthorizator->getLoginUrl($token, ['backlink' => $this->backlink], $redirect_url);
+        $url = $this->todoistAuthenticator->getLoginUrl($token, ['backlink' => $this->backlink], $redirect_url);
         $this->redirectUrl($url);
     }
 
@@ -65,13 +77,13 @@ class SignPresenter extends Presenter
      * @param null|string $state
      * @param null|string $code
      * @param null|string $error
-     * @return \App\Model\Todoist\AuthorizationResponse
-     * @throws \App\Model\Todoist\AuthorizationException
-     * @throws \App\Model\Todoist\TokenExchangeException
+     * @return void
+     * @throws \App\Model\AuthorizationException
      * @throws \Nette\Application\BadRequestException
+     * @throws \Nette\InvalidStateException
      * @throws \RuntimeException
      */
-    public function actionTodoistCallback(?string $state = null, ?string $code = null, ?string $error = null): \App\Model\Todoist\AuthorizationResponse
+    public function actionTodoistCallback(?string $state = null, ?string $code = null, ?string $error = null): void
     {
         if (\is_string($error)) {
             $this->handleTodoistError($error);
@@ -82,9 +94,9 @@ class SignPresenter extends Presenter
         }
 
         $token = $this->getCsrfToken();
-        $auth = $this->todoistAuthorizator->getAccessToken($token, $code, $state);
+        $auth = $this->todoistAuthenticator->getAccessToken($token, $code, $state);
 
-        if(isset($auth->getStateData()['backlink'])) {
+        if (isset($auth->getStateData()['backlink'])) {
             $this->backlink = $auth->getStateData()['backlink'];
         }
 
@@ -98,7 +110,7 @@ class SignPresenter extends Presenter
         ]);
 
         $datastore->insert($entity);
-        
+
         //clean
         $this->removeCsrfToken();
 
@@ -123,6 +135,65 @@ class SignPresenter extends Presenter
 
 
     /**
+     * @throws \Nette\Application\UI\InvalidLinkException
+     * @throws \Nette\Utils\JsonException
+     */
+    public function actionGoogle(): void
+    {
+        $token = $this->createCsrfToken();
+
+        $redirect_url = $this->link('//Sign:googleCallback');
+        $url = $this->googleAuthenticator->getLoginUrl($token, $redirect_url, ['backlink' => $this->backlink]);
+        $this->redirectUrl($url);
+    }
+
+
+    /**
+     * @param null|string $state
+     * @param null|string $code
+     * @param null|string $error
+     * @throws \App\Model\AuthorizationException
+     * @throws \Nette\Security\AuthenticationException
+     * @throws \Nette\Application\BadRequestException
+     * @throws \RuntimeException
+     */
+    public function actionGoogleCallback(?string $state = null, ?string $code = null, ?string $error = null): void
+    {
+        if (\is_string($error)) {
+            $this->handleGoogleError($error);
+        }
+
+        if (!\is_string($state) || !\is_string($code)) {
+            $this->error('Invalid response – State and Code must be presented', IResponse::S400_BAD_REQUEST);
+        }
+        $token = $this->getCsrfToken();
+        $authorization = $this->googleAuthenticator->getAccessToken($token, $code, $state);
+
+        $this->user->login($authorization);
+
+        $this->removeCsrfToken();
+
+        $this->restoreRequest($this->backlink);
+        $this->redirect('Homepage:default');
+    }
+
+
+    /**
+     * @param string $error
+     * @throws \Nette\Application\BadRequestException
+     * @throws \RuntimeException
+     */
+    private function handleGoogleError(string $error): void
+    {
+        if ($error === 'access_denied') {
+            $this->error('User Rejected Authorization Request', IResponse::S403_FORBIDDEN);
+        } else {
+            throw new \RuntimeException(sprintf('Google API returned error: "%s"', $error));
+        }
+    }
+
+
+    /**
      * @return string
      */
     private function createCsrfToken(): string
@@ -133,13 +204,19 @@ class SignPresenter extends Presenter
     }
 
 
+    /**
+     * @return mixed
+     */
     private function getCsrfToken()
     {
         return $this->getHttpRequest()->getCookie(static::CSRF_TOKEN_COOKIE);
     }
 
 
-    private function removeCsrfToken()
+    /**
+     *
+     */
+    private function removeCsrfToken(): void
     {
         $this->getHttpResponse()->deleteCookie(static::CSRF_TOKEN_COOKIE);
     }

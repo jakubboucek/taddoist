@@ -3,13 +3,18 @@ declare(strict_types=1);
 
 namespace App\Model\Todoist;
 
+use App\Model\AuthorizationException;
+use App\Model\CsrfProtectionFailedException;
+use App\Model\Helpers;
+use App\Model\InvalidStateException;
+use App\Model\TokenExchangeException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 use RuntimeException;
 
-class Authorizator
+class Authenticator
 {
     public const API_AUTH_URL = 'https://todoist.com/oauth/authorize';
     public const API_EXCHANGE_URL = 'https://todoist.com/oauth/access_token';
@@ -50,7 +55,7 @@ class Authorizator
         $params = [
             'client_id' => $this->clientId,
             'scope' => static::SCOPE,
-            'state' => $this->urlsafeB64Encode(Json::encode($state)),
+            'state' => Helpers::urlsafeB64Encode(Json::encode($state)),
         ];
 
         if ($redirect_uri !== null) {
@@ -58,16 +63,6 @@ class Authorizator
         }
 
         return sprintf('%s?%s', static::API_AUTH_URL, http_build_query($params));
-    }
-
-
-    /**
-     * @param string $input
-     * @return string
-     */
-    private function urlsafeB64Encode(string $input): string
-    {
-        return str_replace('=', '', strtr(base64_encode($input), '+/', '-_'));
     }
 
 
@@ -98,7 +93,7 @@ class Authorizator
     private function decodeState(string $serializedState, string $csrfToken): array
     {
         try {
-            $state = Json::decode($this->urlsafeB64Decode($serializedState), Json::FORCE_ARRAY);
+            $state = Json::decode(Helpers::urlsafeB64Decode($serializedState), Json::FORCE_ARRAY);
 
             if (!isset($state['csrf']) || $state['csrf'] !== $csrfToken) {
                 $csrf = $state['csrf'] ?? 'parameter undefined';
@@ -116,21 +111,6 @@ class Authorizator
         } catch (JsonException $e) {
             throw new InvalidStateException('Unable to decode State parameter', $e->getCode(), $e);
         }
-    }
-
-
-    /**
-     * @param string $input
-     * @return string
-     */
-    private function urlsafeB64Decode(string $input): string
-    {
-        $remainder = \strlen($input) % 4;
-        if ($remainder) {
-            $padlen = 4 - $remainder;
-            $input .= str_repeat('=', $padlen);
-        }
-        return base64_decode(strtr($input, '-_', '+/'), true);
     }
 
 

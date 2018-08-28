@@ -13,6 +13,9 @@ class DatastoreFactory
     private $googleCredentialsFilename;
 
 
+    /**
+     * @param string $googleCredentialsFilename
+     */
     public function __construct(string $googleCredentialsFilename)
     {
         $this->googleCredentialsFilename = $googleCredentialsFilename;

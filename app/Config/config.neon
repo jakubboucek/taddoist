@@ -3,6 +3,9 @@ parameters:
 		namespace: sessions
 	google:
 		credentialsFile: %appDir%/Config/google-cloud-credentials.json
+	google-sign-in:
+		clientId: 167054054391-3eajbpr5o03r8loogs95meco7l1io83i.apps.googleusercontent.com
+		clientSecret: {put-secret-here}
 	todoist:
 		clientId: 0fbc086bd26340e69669610e54878bef
 		clientSecret: {put-secret-here}
@@ -18,13 +21,16 @@ http:
         - "169.254.0.0/16"
 
 session:
-	expiration: 14 days
+	expiration: 1 month
 	save_path: %session.namespace% # datastore namespace
 	name: AppSession # datastore kind
 
 services:
-	- App\Model\Todoist\Authorizator(%todoist.clientId%, %todoist.clientSecret%)
+	- App\Model\Google\GoogleClientFactory(%google.credentialsFile%)
+	- App\Model\Google\Authenticator(%google-sign-in.clientId%, %google-sign-in.clientSecret%)
+	- App\Model\Todoist\Authenticator(%todoist.clientId%, %todoist.clientSecret%)
 	- App\Model\CookieAuth
+	- App\Model\Authenticator
 	router: App\Router\RouterFactory::create
 	datastoreFactory: App\Model\DatastoreFactory(%google.credentialsFile%)
 	session:

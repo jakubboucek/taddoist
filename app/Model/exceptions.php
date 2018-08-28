@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Model\Todoist;
+namespace App\Model;
 
 class Exception extends \RuntimeException
 {

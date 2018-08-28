@@ -1,5 +1,6 @@
 {
     "require": {
+        "php": ">=7.2",
         "tracy/tracy": "^2.5",
         "latte/latte": "^2.4",
         "nette/utils": "^2.5",
@@ -11,6 +12,9 @@
         "nette/bootstrap": "^2.4",
         "nette/application": "^2.4",
         "google/cloud-datastore": "^1.5",
-        "firebase/php-jwt": "^5.0"
+        "google/apiclient": "^2.2"
+    },
+    "config": {
+        "optimize-autoloader": true
     }
 }
