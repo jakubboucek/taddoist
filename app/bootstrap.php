@@ -5,13 +5,15 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $configurator = new \Nette\Configurator();
 
-$configurator->setDebugMode(true);
-$configurator->enableDebugger();
+$configurator->setDebugMode([])->enableDebugger();
 
-\Tracy\Debugger::$maxLength = 1000;
+$tempDir = __DIR__ . '/../temp';
+if(!is_writable($tempDir)){
+    $tempDir = sys_get_temp_dir();
+}
 
 $configurator->setTimeZone('Europe/Prague');
-$configurator->setTempDirectory(sys_get_temp_dir());
+$configurator->setTempDirectory($tempDir);
 $configurator->createRobotLoader()->addDirectory(__DIR__)->register();
 
 $configurator->addConfig(__DIR__ . '/Config/config.neon');
