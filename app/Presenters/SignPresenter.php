@@ -65,7 +65,7 @@ class SignPresenter extends Presenter
 
         $this->flashMessage('Byli jste odhlášeni', 'success');
 
-        $this->redirect('Homepage:');
+        $this->redirect('Site:');
     }
 
 
@@ -127,7 +127,7 @@ class SignPresenter extends Presenter
         $this->flashMessage('Aplikace Taddoist je nyní připojena na Váš Todoist', 'success');
 
         $this->restoreRequest($this->backlink);
-        $this->redirect('Homepage:');
+        $this->redirect('Site:');
     }
 
 
@@ -188,7 +188,7 @@ class SignPresenter extends Presenter
         $this->flashMessage(sprintf('Nyní jste přihlášeni pod e-mailem: %s, toto přihlášení by mělo zůstat aktivní 30 dní.', $this->user->id), 'success');
 
         $this->restoreRequest($this->backlink);
-        $this->redirect('Homepage:');
+        $this->redirect('Site:');
     }
 
 

@@ -13,8 +13,8 @@ class RouterFactory
     {
         $router = new RouteList();
 
-        $router[] = new Route('<action>', 'Homepage:default');
-        $router[] = new Route('<presenter>/<action>', 'Homepage:default');
+        $router[] = new Route('<action (privacy)>', 'Site:default', Route::ONE_WAY);
+        $router[] = new Route('<presenter>/<action>', 'Site:default');
 
         return $router;
     }
