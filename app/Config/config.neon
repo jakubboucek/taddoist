@@ -1,6 +1,6 @@
 parameters:
 	session:
-		namespace: sessions
+		namespace: Sessions
 	google:
 		credentialsFile: %appDir%/Config/google-cloud-credentials.json
 	google-sign-in:
@@ -29,7 +29,8 @@ services:
 	- App\Model\Google\GoogleClientFactory(%google.credentialsFile%)
 	- App\Model\Google\Authenticator(%google-sign-in.clientId%, %google-sign-in.clientSecret%)
 	- App\Model\Todoist\Authenticator(%todoist.clientId%, %todoist.clientSecret%)
-	- App\Model\CookieAuth
+	- App\Model\Todoist\ClientFactory
+	- App\Model\UserStorage
 	- App\Model\Authenticator
 	router: App\Router\RouterFactory::create
 	datastoreFactory: App\Model\DatastoreFactory(%google.credentialsFile%)

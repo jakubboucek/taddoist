@@ -19,6 +19,9 @@ module.exports = function(grunt) {
                 files: {
                     'app/Model/Bookmarklet/template.js': [
                         'assets/bookmarklet-dev/source.js',
+                    ],
+                    'static/js/main.js': [
+                        'assets/js/main.js',
                     ]
                 }
             }

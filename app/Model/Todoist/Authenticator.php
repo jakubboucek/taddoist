@@ -19,7 +19,7 @@ class Authenticator
     public const API_AUTH_URL = 'https://todoist.com/oauth/authorize';
     public const API_EXCHANGE_URL = 'https://todoist.com/oauth/access_token';
 
-    public const SCOPE = 'task:add,data:read';
+    public const SCOPE = 'data:read_write';
 
     /**
      * @var string

@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
-use App\Model\CookieAuth;
-use App\Model\DatastoreFactory;
 use App\Model\Google;
 use App\Model\Todoist;
+use App\Model\UserRequiredLoggedInFirstException;
+use App\Model\UserStorage;
 use Nette\Application\UI\Presenter;
 use Nette\Http\IResponse;
-use Nette\Utils\DateTime;
 use Nette\Utils\Random;
 
 class SignPresenter extends Presenter
@@ -26,40 +25,36 @@ class SignPresenter extends Presenter
      */
     private $todoistAuthenticator;
     /**
-     * @var CookieAuth
-     */
-    private $cookieAuth;
-    /**
-     * @var DatastoreFactory
-     */
-    private $datastoreFactory;
-    /**
      * @var Google\Authenticator
      */
     private $googleAuthenticator;
+    /**
+     * @var UserStorage
+     */
+    private $userStorage;
 
 
     /**
      * @param Todoist\Authenticator $todoist
      * @param Google\Authenticator $google
-     * @param CookieAuth $cookie
-     * @param DatastoreFactory $datastore
+     * @param UserStorage $userStorage
      */
     public function __construct(
         Todoist\Authenticator $todoist,
         Google\Authenticator $google,
-        CookieAuth $cookie,
-        DatastoreFactory $datastore
+        UserStorage $userStorage
     ) {
         $this->todoistAuthenticator = $todoist;
         $this->googleAuthenticator = $google;
-        $this->cookieAuth = $cookie;
-        $this->datastoreFactory = $datastore;
+        $this->userStorage = $userStorage;
         parent::__construct();
     }
 
 
-    public function actionOut()
+    /**
+     *
+     */
+    public function actionOut(): void
     {
         $this->user->logout(true);
 
@@ -75,6 +70,11 @@ class SignPresenter extends Presenter
      */
     public function actionTodoist(): void
     {
+        if ($this->user->loggedIn !== true) {
+            $backlink = $this->storeRequest();
+            $this->redirect('google', ['backlink' => $backlink]);
+        }
+
         $token = $this->createCsrfToken();
 
         $redirect_url = $this->link('//Sign:actionTodoistCallback');
@@ -88,9 +88,9 @@ class SignPresenter extends Presenter
      * @param null|string $code
      * @param null|string $error
      * @return void
+     * @throws UserRequiredLoggedInFirstException
      * @throws \App\Model\AuthorizationException
      * @throws \Nette\Application\BadRequestException
-     * @throws \Nette\InvalidStateException
      * @throws \RuntimeException
      */
     public function actionTodoistCallback(?string $state = null, ?string $code = null, ?string $error = null): void
@@ -110,16 +110,7 @@ class SignPresenter extends Presenter
             $this->backlink = $auth->getStateData()['backlink'];
         }
 
-        $userId = $this->cookieAuth->register();
-
-        $datastore = $this->datastoreFactory->create($userId);
-
-        $entity = $datastore->entity($datastore->key('UserData', 'session'), [
-            'access_token' => $auth->getAccesToken(),
-            'created' => new DateTime(),
-        ]);
-
-        $datastore->insert($entity);
+        $this->userStorage->set('todoist.access_token', $auth->getAccesToken());
 
         //clean
         $this->removeCsrfToken();
@@ -185,7 +176,8 @@ class SignPresenter extends Presenter
 
         $this->removeCsrfToken();
 
-        $this->flashMessage(sprintf('Nyní jste přihlášeni pod e-mailem: %s, toto přihlášení by mělo zůstat aktivní 30 dní.', $this->user->id), 'success');
+        $this->flashMessage(sprintf('Nyní jste přihlášeni pod e-mailem: %s, toto přihlášení by mělo zůstat aktivní 30 dní.',
+            $this->user->id), 'success');
 
         $this->restoreRequest($this->backlink);
         $this->redirect('Site:');
@@ -219,9 +211,9 @@ class SignPresenter extends Presenter
 
 
     /**
-     * @return mixed
+     * @return string|null
      */
-    private function getCsrfToken()
+    private function getCsrfToken(): ?string
     {
         return $this->getHttpRequest()->getCookie(static::CSRF_TOKEN_COOKIE);
     }

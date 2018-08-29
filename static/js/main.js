@@ -1,0 +1,1 @@
+$(()=>{$(".copy-field").on("focus",e=>{console.log(e.target),$(e.target).select()})});

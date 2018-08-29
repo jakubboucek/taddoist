@@ -1,0 +1,27 @@
+{block title}Nastavení Taddoistu{/block}
+{block content}
+
+<div class="">
+    <div class="panel panel-default">
+        <div class="panel-heading">Univerzální bookmarklet</div>
+        <div class="panel-body">
+            <p>Tento bookmarklet zobrazí výběr projektů, do kterého se má odkaz uložit.</p>
+            <input type="text" readonly class="form-control copy-field" value="{$baseLink}">
+        </div>
+    </div>
+</div>
+
+<div class="">
+    <div class="panel panel-default">
+        <div class="panel-heading">Bookmarklety pro projekty</div>
+        <div class="panel-body">
+            <p>Bookmarklety, které zajistí přímé vložení Tasku do daného projektu bez dalšího zdržování.</p>
+        </div>
+        <table class="table">
+            <tr n:foreach="$projectLinks as $link">
+                <td>{$link[0]}</td>
+                <td><input type="text" readonly class="form-control copy-field" value="{$link[1]}"></td>
+            </tr>
+        </table>
+    </div>
+</div>
