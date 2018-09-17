@@ -5,6 +5,13 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $configurator = new \Nette\Configurator();
 
+// <Logger shitcode=true>
+$logging = new \Google\Cloud\Logging\LoggingClient(
+    ['keyFilePath' => __DIR__.'/Config/google-cloud-credentials.json']
+);
+\Tracy\Debugger::setLogger(new \App\Model\Google\Logger($logging->logger('nette')));
+// </Logger shitcode=true>
+
 $configurator->setDebugMode([])->enableDebugger();
 
 $tempDir = __DIR__ . '/../temp';

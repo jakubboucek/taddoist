@@ -3,9 +3,12 @@ declare(strict_types=1);
 
 namespace App\Model\Todoist;
 
-use App\Model\ApiOperationFailed;
+use App\Model\ApiForbiddenException;
+use App\Model\ApiOperationException;
 use GuzzleHttp\RequestOptions;
 use Nette\Utils\Json;
+use Tracy\Debugger;
+use Tracy\ILogger;
 
 class Client
 {
@@ -35,7 +38,7 @@ class Client
      * @param string $content
      * @param null|string $projectId
      * @return array
-     * @throws ApiOperationFailed
+     * @throws ApiOperationException
      * @throws \Nette\Utils\JsonException
      * @throws \RuntimeException
      */
@@ -66,41 +69,29 @@ class Client
     /**
      * @param string $uri
      * @return array
+     * @throws ApiForbiddenException
+     * @throws ApiOperationException
      * @throws \Nette\Utils\JsonException
-     * @throws \RuntimeException
      */
     private function requestGet(string $uri): array
     {
-        $options['headers']['X-Request-Id'] = $this->generateV4GUID();
-        $result = $this->client->get($uri, $options);
-        $status = $result->getStatusCode();
-        if ($status !== 200) {
-            $content = $result->getBody()->getContents();
-            throw new ApiOperationFailed("Server returns status: $status ($content)");
-        }
-        return Json::decode($result->getBody()->getContents(), Json::FORCE_ARRAY);
+        return $this->request('get', $uri);
     }
 
 
     /**
      * @param string $uri
-     * @param array $options
+     * @param array $data
      * @return array
-     * @throws ApiOperationFailed
+     * @throws ApiForbiddenException
+     * @throws ApiOperationException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Nette\Utils\JsonException
      * @throws \RuntimeException
      */
-    private function requestJsonPost(string $uri, array $options): array
+    private function requestJsonPost(string $uri, array $data): array
     {
-        $options['headers']['X-Request-Id'] = $this->generateV4GUID();
-        $data = [RequestOptions::JSON => $options];
-        $result = $this->client->post($uri, $data);
-        $status = $result->getStatusCode();
-        if ($status !== 200) {
-            $content = $result->getBody()->getContents();
-            throw new ApiOperationFailed("Server returns status: $status ($content)");
-        }
-        return Json::decode($result->getBody()->getContents(), Json::FORCE_ARRAY);
+        return $this->request('post', $uri, $data);
     }
 
 
@@ -113,6 +104,41 @@ class Client
         $data[6] = \chr(\ord($data[6]) & 0x0f | 0x40);
         $data[8] = \chr(\ord($data[8]) & 0x3f | 0x80);
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+
+
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array $options
+     * @param array|null $data
+     * @return mixed
+     * @throws ApiForbiddenException
+     * @throws ApiOperationException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Nette\Utils\JsonException
+     * @throws \RuntimeException
+     */
+    protected function request(string $method, string $uri, array $data = null, array $options = [])
+    {
+        $options['headers']['X-Request-Id'] = $this->generateV4GUID();
+        if($data) {
+            $options[RequestOptions::JSON] = $data;
+        }
+
+        $result = $this->client->request($method, $uri, $options);
+        $content = $result->getBody()->getContents();
+        $status = $result->getStatusCode();
+        if ($status !== 200) {
+            $message = "Server '$uri' returns status: $status ($content)";
+            Debugger::log($message, ILogger::WARNING);
+            if ($status === 403) {
+                throw new ApiForbiddenException($message, $status);
+            }
+
+            throw new ApiOperationException($message, $status);
+        }
+        return Json::decode($content, Json::FORCE_ARRAY);
     }
 
 }

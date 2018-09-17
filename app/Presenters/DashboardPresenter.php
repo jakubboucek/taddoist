@@ -4,11 +4,14 @@ declare(strict_types=1);
 namespace App\Presenters;
 
 use App\Model\AccessTokenNotFoundException;
+use App\Model\ApiForbiddenException;
 use App\Model\Bookmarklet;
 use App\Model\Todoist;
+use App\Model\UserRequiredLoggedInFirstException;
 use Nette\Application\UI\Presenter;
 use Nette\Utils\JsonException;
 use RuntimeException;
+use Tracy\Debugger;
 
 
 class DashboardPresenter extends Presenter
@@ -18,7 +21,15 @@ class DashboardPresenter extends Presenter
      */
     private $todoistClientFactory;
 
+    /**
+     * @var array
+     */
+    private $projects;
 
+
+    /**
+     * @param Todoist\ClientFactory $todoistClientFactory
+     */
     public function __construct(Todoist\ClientFactory $todoistClientFactory)
     {
         $this->todoistClientFactory = $todoistClientFactory;
@@ -26,12 +37,32 @@ class DashboardPresenter extends Presenter
     }
 
 
+    /**
+     * @throws JsonException
+     * @throws RuntimeException
+     */
     protected function startup()
     {
-        if ($this->user->loggedIn !== true) {
+        try {
+            if ($this->user->loggedIn !== true) {
+                throw new UserRequiredLoggedInFirstException('StartUp: User not logged');
+            }
+
+            $this->projects = $this->findProjects();
+        } catch (UserRequiredLoggedInFirstException $e) {
+            Debugger::log(sprintf('%s: #%d %s', \get_class($e), $e->getCode(), $e->getMessage()));
             $backlink = $this->storeRequest();
             $this->redirect('Sign:google', ['backlink' => $backlink]);
+        } catch (AccessTokenNotFoundException $e) {
+            Debugger::log(sprintf('%s: #%d %s', \get_class($e), $e->getCode(), $e->getMessage()));
+            $backlink = $this->storeRequest();
+            $this->redirect('Sign:todoist', ['backlink' => $backlink]);
+        } catch (ApiForbiddenException $e) {
+            Debugger::log(sprintf('%s: #%d %s', \get_class($e), $e->getCode(), $e->getMessage()));
+            $backlink = $this->storeRequest();
+            $this->redirect('Sign:todoist', ['backlink' => $backlink]);
         }
+
         parent::startup();
     }
 
@@ -39,21 +70,13 @@ class DashboardPresenter extends Presenter
     /**
      * @throws JsonException
      * @throws RuntimeException
-     * @throws \App\Model\UserRequiredLoggedInFirstException
      * @throws \Nette\Application\UI\InvalidLinkException
      */
-    public function renderDefault()
+    public function renderDefault(): void
     {
-        try {
-            $projects = $this->findProjects();
-        } catch (AccessTokenNotFoundException $e) {
-            $backlink = $this->storeRequest();
-            $this->redirect('Sign:todoist', ['backlink' => $backlink]);
-        }
-
         $links = [];
 
-        foreach ($projects as $project) {
+        foreach ($this->projects as $project) {
             $links[] = [$project['name'], $this->getBookmarklet((string)$project['id'])];
         }
 

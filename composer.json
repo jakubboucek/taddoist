@@ -1,6 +1,8 @@
 {
     "require": {
         "php": ">=7.2",
+        "ext-json": "*",
+        "ext-openssl": "*",
         "tracy/tracy": "^2.5",
         "latte/latte": "^2.4",
         "nette/utils": "^2.5",
@@ -12,7 +14,13 @@
         "nette/bootstrap": "^2.4",
         "nette/application": "^2.4",
         "google/cloud-datastore": "^1.5",
-        "google/apiclient": "^2.2"
+        "google/apiclient": "^2.2",
+        "google/cloud-logging": "^1.12"
+    },
+    "autoload": {
+        "files": [
+            "app/Model/Google/Logger.php"
+        ]
     },
     "config": {
         "optimize-autoloader": true

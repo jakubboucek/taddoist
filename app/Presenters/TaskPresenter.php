@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
+use App\Model\AccessTokenNotFoundException;
 use App\Model\Todoist;
+use App\Model\UserRequiredLoggedInFirstException;
 use Nette\Application\UI\Presenter;
 
 
@@ -34,7 +36,15 @@ class TaskPresenter extends Presenter
     }
 
 
-    public function actionCreate(?string $href = null, ?string $title = null, ?string $projectId = null)
+    /**
+     * @param null|string $href
+     * @param null|string $title
+     * @param null|string $projectId
+     * @throws \App\Model\ApiOperationException
+     * @throws \Nette\Utils\JsonException
+     * @throws \RuntimeException
+     */
+    public function actionCreate(?string $href = null, ?string $title = null, ?string $projectId = null): void
     {
         if($href === null) {
             $this->flashMessage('Vložený odkaz je neplatný', 'danger');
@@ -44,11 +54,18 @@ class TaskPresenter extends Presenter
         /** @noinspection IsEmptyFunctionUsageInspection */
         $content = !empty($title) ? sprintf('[%s](%s)', $title, $href) : $href;
 
-        $id = $this->createTask($content, $projectId);
+        try {
+            $id = $this->createTask($content, $projectId);
+            $url = "https://todoist.com/showTask?id=$id";
+            $this->redirectUrl($url);
+        } catch (UserRequiredLoggedInFirstException $e) {
+            $backlink = $this->storeRequest();
+            $this->redirect('Sign:google', ['backlink' => $backlink]);
+        } catch (AccessTokenNotFoundException $e) {
+            $backlink = $this->storeRequest();
+            $this->redirect('Sign:todoist', ['backlink' => $backlink]);
+        }
 
-        $url = "https://todoist.com/showTask?id=$id";
-
-        $this->redirectUrl($url);
     }
 
 
@@ -57,7 +74,7 @@ class TaskPresenter extends Presenter
      * @param null|string $projectId
      * @return int
      * @throws \App\Model\AccessTokenNotFoundException
-     * @throws \App\Model\ApiOperationFailed
+     * @throws \App\Model\ApiOperationException
      * @throws \App\Model\UserRequiredLoggedInFirstException
      * @throws \Nette\Utils\JsonException
      * @throws \RuntimeException

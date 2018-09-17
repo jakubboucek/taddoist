@@ -38,7 +38,13 @@ class AccessTokenNotFoundException extends AuthorizationException
 
 
 
-class ApiOperationFailed extends Exception
+class ApiOperationException extends Exception
+{
+}
+
+
+
+class ApiForbiddenException extends ApiOperationException
 {
 }
 
