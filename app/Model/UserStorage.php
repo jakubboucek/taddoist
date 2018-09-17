@@ -62,7 +62,7 @@ class UserStorage
                 'created' => new DateTime(),
             ],
             [
-                'excludeFromIndexes' => ['value', 'created']
+                'excludeFromIndexes' => ['data', 'created']
             ]
         );
 

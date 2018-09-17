@@ -68,7 +68,7 @@ class SignPresenter extends Presenter
      * @throws \Nette\Application\UI\InvalidLinkException
      * @throws \Nette\Utils\JsonException
      */
-    public function actionTodoist(): void
+    public function actionTodoistGo(): void
     {
         if ($this->user->loggedIn !== true) {
             $backlink = $this->storeRequest();
@@ -77,7 +77,7 @@ class SignPresenter extends Presenter
 
         $token = $this->createCsrfToken();
 
-        $redirect_url = $this->link('//Sign:actionTodoistCallback');
+        $redirect_url = $this->link('//Sign:todoistCallback', ['backlink' => null]);
         $url = $this->todoistAuthenticator->getLoginUrl($token, ['backlink' => $this->backlink], $redirect_url);
         $this->redirectUrl($url);
     }
@@ -141,11 +141,11 @@ class SignPresenter extends Presenter
      * @throws \Nette\Application\UI\InvalidLinkException
      * @throws \Nette\Utils\JsonException
      */
-    public function actionGoogle(): void
+    public function actionGoogleGo(): void
     {
         $token = $this->createCsrfToken();
 
-        $redirect_url = $this->link('//Sign:googleCallback');
+        $redirect_url = $this->link('//Sign:googleCallback', ['backlink' => null]);
         $url = $this->googleAuthenticator->getLoginUrl($token, $redirect_url, ['backlink' => $this->backlink]);
         $this->redirectUrl($url);
     }

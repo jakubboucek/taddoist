@@ -10,6 +10,7 @@ class Generator
 {
     private const IDENTIFICATOR_ENDPOINT = '$__endpoint__';
     private const IDENTIFICATOR_PROJECT = '$__projectId__';
+    private const IDENTIFICATOR_NEWWIN = '$__newWindow__';
 
 
     /**
@@ -19,17 +20,19 @@ class Generator
      * @throws \Nette\Utils\JsonException
      * @throws \Nette\IOException
      */
-    public static function generate(string $endpoint, ?string $projectId = null): string
+    public static function generate(string $endpoint, ?string $projectId = null, bool $newWindow = true): string
     {
         $bookmarklet = 'javascript:' . static::getTemplate();
         $bookmarklet = str_replace(
             [
                 static::IDENTIFICATOR_ENDPOINT,
-                static::IDENTIFICATOR_PROJECT
+                static::IDENTIFICATOR_PROJECT,
+                static::IDENTIFICATOR_NEWWIN
             ],
             [
                 Json::encode($endpoint),
-                Json::encode($projectId)
+                Json::encode($projectId),
+                Json::encode($newWindow)
             ],
             $bookmarklet
         );

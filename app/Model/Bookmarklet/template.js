@@ -1,1 +1,1 @@
-!function(e,n,t){const p=new URL(n),o=p.searchParams;o.append("href",e.href),o.append("title",document.title),t&&o.append("projectId",t),e.href=p.href}(location,$__endpoint__,$__projectId__);
+!function(e,n,t,o){const _=new URL(n),d=_.searchParams;d.append("href",e.href),d.append("title",document.title),t&&d.append("projectId",t),o?window.open(_.href,"taddoist"):e.href=_.href}(location,$__endpoint__,$__projectId__,$__newWindow__);
