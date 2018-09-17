@@ -1,1 +1,1 @@
-$(()=>{$(".copy-field").on("focus",e=>{console.log(e.target),$(e.target).select()})});
+$(()=>{const t=$(".copy-field");t.on("focus",t=>{console.log(t.target);$(t.target).select()});t.each((t,e)=>{const l=$(e);const o=l.closest("tr");const c=$("a",o);c.attr("href",l.val())});$(".noclick").click(t=>{alert("Na tlačítko neklikej, ale přetáhni jej do lišty záložek");t.preventDefault()})});

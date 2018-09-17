@@ -27,8 +27,14 @@
         </div>
         <table class="table">
             <tr n:foreach="$projectLinks as $link">
-                <td>{$link[0]}</td>
-                <td><input type="text" readonly class="form-control copy-field" value="{$link[1]}"></td>
+                <td>
+                    <a href="#" class="noclick btn btn-info">
+                        <i class="glyphicon glyphicon-new-window"></i> TODO ({$link[0]})
+                    </a>
+                </td>
+                <td style="width:80%">
+                    <input type="text" readonly class="form-control copy-field" value="{$link[1]}">
+                </td>
             </tr>
         </table>
     </div>
