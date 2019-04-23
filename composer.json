@@ -19,6 +19,7 @@
     },
     "autoload": {
         "files": [
+            "app/Bootstrap.php",
             "app/Model/Google/Logger.php"
         ]
     },
