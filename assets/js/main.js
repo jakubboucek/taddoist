@@ -2,7 +2,6 @@ $(()=>{
     const $copyField = $('.copy-field');
 
     $copyField.on('focus', (event)=>{
-        console.log(event.target);
         $(event.target).select();
     });
 

@@ -1,1 +1,1 @@
-$(()=>{const t=$(".copy-field");t.on("focus",t=>{console.log(t.target);$(t.target).select()});t.each((t,e)=>{const l=$(e);const o=l.closest("tr");const c=$("a",o);c.attr("href",l.val())});$(".noclick").click(t=>{alert("Na tlačítko neklikej, ale přetáhni jej do lišty záložek");t.preventDefault()})});
+$(()=>{const e=$(".copy-field");e.on("focus",e=>{$(e.target).select()}),e.each((e,t)=>{const l=$(t),c=l.closest("tr");$("a",c).attr("href",l.val())}),$(".noclick").click(e=>{alert("Na tlačítko neklikej, ale přetáhni jej do lišty záložek"),e.preventDefault()})});
