@@ -15,13 +15,8 @@ class Bootstrap
     public static function boot(): Configurator
     {
         $configurator = new Configurator();
-
-        // <Logger shitcode=true>
-        $logging = new LoggingClient(
-            ['keyFilePath' => __DIR__ . '/Config/google-cloud-credentials.json']
-        );
-        Debugger::setLogger(new Logger($logging->logger('nette')));
-        // </Logger shitcode=true>
+        self::fixRealServerPort();
+        self::setLogger();
 
         $configurator->setDebugMode([])->enableDebugger();
 
@@ -38,5 +33,24 @@ class Bootstrap
         $configurator->addConfig(__DIR__ . '/Config/config.local.neon');
 
         return $configurator;
+    }
+
+
+    protected static function fixRealServerPort(): void
+    {
+        if (isset($_SERVER['GAE_SERVICE'])) {
+            $_SERVER['SERVER_PORT'] = 443;
+        }
+    }
+
+
+    protected static function setLogger(): void
+    {
+// <Logger shitcode=true>
+        $logging = new LoggingClient(
+            ['keyFilePath' => __DIR__ . '/Config/google-cloud-credentials.json']
+        );
+        Debugger::setLogger(new Logger($logging->logger('nette')));
+        // </Logger shitcode=true>
     }
 }
