@@ -1,0 +1,20 @@
+{block title}Vytvoření odkazu{/block}
+{block content}
+
+<div class="">
+    <div class="panel panel-default">
+        <div class="panel-heading">Odkaz „<strong>{$title}</strong>“</div>
+        <div class="panel-body">
+            <p>Vyberte projekt, do kterého chcete odkaz vložit:</p>
+        </div>
+        <table class="table">
+            <tr n:foreach="$projectLinks as $link">
+                <td>
+                    <a href="{$link[1]}" class="btn btn-primary">
+                        <i class="glyphicon glyphicon-arrow-right"></i> Vložit do projektu: „<strong>{$link[0]}</strong>“
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

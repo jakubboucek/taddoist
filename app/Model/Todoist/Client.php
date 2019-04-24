@@ -7,6 +7,7 @@ use App\Model\ApiForbiddenException;
 use App\Model\ApiOperationException;
 use GuzzleHttp\RequestOptions;
 use Nette\Utils\Json;
+use Ramsey\Uuid\Uuid;
 use Tracy\Debugger;
 use Tracy\ILogger;
 
@@ -36,19 +37,21 @@ class Client
 
     /**
      * @param string $content
-     * @param null|string $projectId
+     * @param null|int $projectId
      * @return array
+     * @throws ApiForbiddenException
      * @throws ApiOperationException
      * @throws \Nette\Utils\JsonException
      * @throws \RuntimeException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function createTask(string $content, ?string $projectId = null): array
+    public function createTask(string $content, ?int $projectId = null): array
     {
         $options = [
             'content' => $content,
         ];
         if ($projectId) {
-            $options['project_id'] = (int)$projectId;
+            $options['project_id'] = $projectId;
         }
 
         return $this->requestJsonPost('tasks', $options);
@@ -57,7 +60,11 @@ class Client
 
     /**
      * @return array
+     * @throws ApiForbiddenException
+     * @throws ApiOperationException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Nette\Utils\JsonException
+     * @throws \Ramsey\Uuid\Exception\UnsatisfiedDependencyException
      * @throws \RuntimeException
      */
     public function findProjects(): array
@@ -71,7 +78,10 @@ class Client
      * @return array
      * @throws ApiForbiddenException
      * @throws ApiOperationException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Nette\Utils\JsonException
+     * @throws \Ramsey\Uuid\Exception\UnsatisfiedDependencyException
+     * @throws \RuntimeException
      */
     private function requestGet(string $uri): array
     {
@@ -97,32 +107,31 @@ class Client
 
     /**
      * @return string
+     * @throws \Ramsey\Uuid\Exception\UnsatisfiedDependencyException
      */
     private function generateV4GUID(): string
     {
-        $data = openssl_random_pseudo_bytes(16);
-        $data[6] = \chr(\ord($data[6]) & 0x0f | 0x40);
-        $data[8] = \chr(\ord($data[8]) & 0x3f | 0x80);
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+        return Uuid::uuid4()->toString();
     }
 
 
     /**
      * @param string $method
      * @param string $uri
-     * @param array $options
      * @param array|null $data
+     * @param array $options
      * @return mixed
      * @throws ApiForbiddenException
      * @throws ApiOperationException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Nette\Utils\JsonException
+     * @throws \Ramsey\Uuid\Exception\UnsatisfiedDependencyException
      * @throws \RuntimeException
      */
     protected function request(string $method, string $uri, array $data = null, array $options = [])
     {
         $options['headers']['X-Request-Id'] = $this->generateV4GUID();
-        if($data) {
+        if ($data) {
             $options[RequestOptions::JSON] = $data;
         }
 
@@ -130,15 +139,14 @@ class Client
         $content = $result->getBody()->getContents();
         $status = $result->getStatusCode();
         if ($status !== 200) {
-            $message = "Server '$uri' returns status: $status ($content)";
+            $message = "Remote API on endpoint '$uri' returns status: $status";
             Debugger::log($message, ILogger::WARNING);
             if ($status === 403) {
-                throw new ApiForbiddenException($message, $status);
+                throw (new ApiForbiddenException($message, $status))->setContent($content);
             }
 
-            throw new ApiOperationException($message, $status);
+            throw (new ApiOperationException($message, $status))->setContent($content);
         }
         return Json::decode($content, Json::FORCE_ARRAY);
     }
-
 }

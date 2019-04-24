@@ -15,7 +15,8 @@
         "nette/application": "^2.4",
         "google/cloud-datastore": "^1.5",
         "google/apiclient": "^2.2",
-        "google/cloud-logging": "^1.12"
+        "google/cloud-logging": "^1.12",
+        "ramsey/uuid": "^3.8"
     },
     "autoload": {
         "files": [

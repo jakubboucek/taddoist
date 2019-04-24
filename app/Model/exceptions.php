@@ -2,7 +2,9 @@
 
 namespace App\Model;
 
-class Exception extends \RuntimeException
+use RuntimeException;
+
+class Exception extends RuntimeException
 {
 }
 
@@ -33,12 +35,6 @@ class TokenExchangeException extends AuthorizationException
 
 
 class AccessTokenNotFoundException extends AuthorizationException
-{
-}
-
-
-
-class ApiOperationException extends Exception
 {
 }
 

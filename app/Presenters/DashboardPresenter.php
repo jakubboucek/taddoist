@@ -40,8 +40,9 @@ class DashboardPresenter extends Presenter
     /**
      * @throws JsonException
      * @throws RuntimeException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function startup()
+    protected function startup(): void
     {
         try {
             if ($this->user->loggedIn !== true) {
@@ -50,15 +51,15 @@ class DashboardPresenter extends Presenter
 
             $this->projects = $this->findProjects();
         } catch (UserRequiredLoggedInFirstException $e) {
-            Debugger::log(sprintf('%s: #%d %s', \get_class($e), $e->getCode(), $e->getMessage()));
+            Debugger::log(sprintf('%s: #%d %s', get_class($e), $e->getCode(), $e->getMessage()));
             $backlink = $this->storeRequest();
             $this->redirect('Sign:google', ['backlink' => $backlink]);
         } catch (AccessTokenNotFoundException $e) {
-            Debugger::log(sprintf('%s: #%d %s', \get_class($e), $e->getCode(), $e->getMessage()));
+            Debugger::log(sprintf('%s: #%d %s', get_class($e), $e->getCode(), $e->getMessage()));
             $backlink = $this->storeRequest();
             $this->redirect('Sign:todoist', ['backlink' => $backlink]);
         } catch (ApiForbiddenException $e) {
-            Debugger::log(sprintf('%s: #%d %s', \get_class($e), $e->getCode(), $e->getMessage()));
+            Debugger::log(sprintf('%s: #%d %s', get_class($e), $e->getCode(), $e->getMessage()));
             $backlink = $this->storeRequest();
             $this->redirect('Sign:todoist', ['backlink' => $backlink]);
         }
@@ -88,10 +89,14 @@ class DashboardPresenter extends Presenter
 
     /**
      * @return array
-     * @throws \App\Model\AccessTokenNotFoundException
-     * @throws \Nette\Utils\JsonException
-     * @throws \App\Model\UserRequiredLoggedInFirstException
+     * @throws AccessTokenNotFoundException
+     * @throws ApiForbiddenException
+     * @throws JsonException
      * @throws RuntimeException
+     * @throws UserRequiredLoggedInFirstException
+     * @throws \App\Model\ApiOperationException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Ramsey\Uuid\Exception\UnsatisfiedDependencyException
      */
     private function findProjects(): array
     {

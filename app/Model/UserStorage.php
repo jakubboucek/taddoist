@@ -53,7 +53,7 @@ class UserStorage
      * @param mixed $value
      * @throws UserRequiredLoggedInFirstException
      */
-    public function set(string $key, $value)
+    public function set(string $key, $value): void
     {
         $entity = $this->datastore->entity(
             $this->getKey($key),
@@ -75,7 +75,7 @@ class UserStorage
      * @return \Google\Cloud\Datastore\Key
      * @throws UserRequiredLoggedInFirstException
      */
-    private function getKey(string $key)
+    private function getKey(string $key): \Google\Cloud\Datastore\Key
     {
         $kind = $this->getUserId();
 
