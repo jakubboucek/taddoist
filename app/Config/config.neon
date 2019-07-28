@@ -32,6 +32,7 @@ services:
 	- App\Model\Todoist\ClientFactory
 	- App\Model\UserStorage
 	- App\Model\Authenticator
+	- App\Components\VersionRenderer
 	router: App\Router\RouterFactory::create
 	datastoreFactory: App\Model\DatastoreFactory(%google.credentialsFile%)
 	session:

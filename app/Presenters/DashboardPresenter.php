@@ -5,17 +5,24 @@ namespace App\Presenters;
 
 use App\Model\AccessTokenNotFoundException;
 use App\Model\ApiForbiddenException;
+use App\Model\ApiOperationException;
 use App\Model\Bookmarklet;
 use App\Model\Todoist;
 use App\Model\UserRequiredLoggedInFirstException;
+use GuzzleHttp\Exception\GuzzleException;
+use Nette\Application\UI\InvalidLinkException;
 use Nette\Application\UI\Presenter;
+use Nette\IOException;
 use Nette\Utils\JsonException;
+use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use RuntimeException;
 use Tracy\Debugger;
 
 
 class DashboardPresenter extends Presenter
 {
+    use LayoutTrait;
+
     /**
      * @var Todoist\ClientFactory
      */
@@ -40,7 +47,7 @@ class DashboardPresenter extends Presenter
     /**
      * @throws JsonException
      * @throws RuntimeException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     protected function startup(): void
     {
@@ -71,7 +78,7 @@ class DashboardPresenter extends Presenter
     /**
      * @throws JsonException
      * @throws RuntimeException
-     * @throws \Nette\Application\UI\InvalidLinkException
+     * @throws InvalidLinkException
      */
     public function renderDefault(): void
     {
@@ -94,9 +101,9 @@ class DashboardPresenter extends Presenter
      * @throws JsonException
      * @throws RuntimeException
      * @throws UserRequiredLoggedInFirstException
-     * @throws \App\Model\ApiOperationException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Ramsey\Uuid\Exception\UnsatisfiedDependencyException
+     * @throws ApiOperationException
+     * @throws GuzzleException
+     * @throws UnsatisfiedDependencyException
      */
     private function findProjects(): array
     {
@@ -108,9 +115,9 @@ class DashboardPresenter extends Presenter
     /**
      * @param null|string $projectId
      * @return string
-     * @throws \Nette\Application\UI\InvalidLinkException
-     * @throws \Nette\IOException
-     * @throws \Nette\Utils\JsonException
+     * @throws InvalidLinkException
+     * @throws IOException
+     * @throws JsonException
      */
     private function getBookmarklet(?string $projectId = null): string
     {

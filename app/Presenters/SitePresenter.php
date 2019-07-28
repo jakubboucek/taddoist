@@ -7,7 +7,9 @@ use Nette\Application\UI\Presenter;
 
 class SitePresenter extends Presenter
 {
-    public function renderDefault()
+    use LayoutTrait;
+
+    public function renderDefault(): void
     {
         if ($this->user->loggedIn === true) {
             $this->redirect('Dashboard:');

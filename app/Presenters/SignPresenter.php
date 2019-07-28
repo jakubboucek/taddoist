@@ -3,16 +3,24 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
+use App\Model\AuthorizationException;
 use App\Model\Google;
 use App\Model\Todoist;
 use App\Model\UserRequiredLoggedInFirstException;
 use App\Model\UserStorage;
+use Nette\Application\BadRequestException;
+use Nette\Application\UI\InvalidLinkException;
 use Nette\Application\UI\Presenter;
 use Nette\Http\IResponse;
+use Nette\Security\AuthenticationException;
+use Nette\Utils\JsonException;
 use Nette\Utils\Random;
+use RuntimeException;
 
 class SignPresenter extends Presenter
 {
+    use LayoutTrait;
+
     private const CSRF_TOKEN_COOKIE = 'taddoist-sign-csrf';
 
     /**
@@ -65,8 +73,8 @@ class SignPresenter extends Presenter
 
 
     /**
-     * @throws \Nette\Application\UI\InvalidLinkException
-     * @throws \Nette\Utils\JsonException
+     * @throws InvalidLinkException
+     * @throws JsonException
      */
     public function actionTodoistGo(): void
     {
@@ -89,17 +97,17 @@ class SignPresenter extends Presenter
      * @param null|string $error
      * @return void
      * @throws UserRequiredLoggedInFirstException
-     * @throws \App\Model\AuthorizationException
-     * @throws \Nette\Application\BadRequestException
-     * @throws \RuntimeException
+     * @throws AuthorizationException
+     * @throws BadRequestException
+     * @throws RuntimeException
      */
     public function actionTodoistCallback(?string $state = null, ?string $code = null, ?string $error = null): void
     {
-        if (\is_string($error)) {
+        if (is_string($error)) {
             $this->handleTodoistError($error);
         }
 
-        if (!\is_string($state) || !\is_string($code)) {
+        if (!is_string($state) || !is_string($code)) {
             $this->error('Invalid response – State and Code must be presented', IResponse::S400_BAD_REQUEST);
         }
 
@@ -124,22 +132,22 @@ class SignPresenter extends Presenter
 
     /**
      * @param string $error
-     * @throws \Nette\Application\BadRequestException
-     * @throws \RuntimeException
+     * @throws BadRequestException
+     * @throws RuntimeException
      */
     private function handleTodoistError(string $error): void
     {
         if ($error === 'access_denied') {
             $this->error('User Rejected Authorization Request', IResponse::S403_FORBIDDEN);
         } else {
-            throw new \RuntimeException(sprintf('Todoist API returned error: "%s"', $error));
+            throw new RuntimeException(sprintf('Todoist API returned error: "%s"', $error));
         }
     }
 
 
     /**
-     * @throws \Nette\Application\UI\InvalidLinkException
-     * @throws \Nette\Utils\JsonException
+     * @throws InvalidLinkException
+     * @throws JsonException
      */
     public function actionGoogleGo(): void
     {
@@ -155,18 +163,18 @@ class SignPresenter extends Presenter
      * @param null|string $state
      * @param null|string $code
      * @param null|string $error
-     * @throws \App\Model\AuthorizationException
-     * @throws \Nette\Security\AuthenticationException
-     * @throws \Nette\Application\BadRequestException
-     * @throws \RuntimeException
+     * @throws AuthorizationException
+     * @throws AuthenticationException
+     * @throws BadRequestException
+     * @throws RuntimeException
      */
     public function actionGoogleCallback(?string $state = null, ?string $code = null, ?string $error = null): void
     {
-        if (\is_string($error)) {
+        if (is_string($error)) {
             $this->handleGoogleError($error);
         }
 
-        if (!\is_string($state) || !\is_string($code)) {
+        if (!is_string($state) || !is_string($code)) {
             $this->error('Invalid response – State and Code must be presented', IResponse::S400_BAD_REQUEST);
         }
         $token = $this->getCsrfToken();
@@ -186,15 +194,15 @@ class SignPresenter extends Presenter
 
     /**
      * @param string $error
-     * @throws \Nette\Application\BadRequestException
-     * @throws \RuntimeException
+     * @throws BadRequestException
+     * @throws RuntimeException
      */
     private function handleGoogleError(string $error): void
     {
         if ($error === 'access_denied') {
             $this->error('User Rejected Authorization Request', IResponse::S403_FORBIDDEN);
         } else {
-            throw new \RuntimeException(sprintf('Google API returned error: "%s"', $error));
+            throw new RuntimeException(sprintf('Google API returned error: "%s"', $error));
         }
     }
 

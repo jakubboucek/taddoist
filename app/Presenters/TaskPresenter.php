@@ -4,16 +4,15 @@ declare(strict_types=1);
 namespace App\Presenters;
 
 use App\Model\AccessTokenNotFoundException;
-use App\Model\ApiForbiddenException;
 use App\Model\ApiOperationException;
 use App\Model\Todoist;
 use App\Model\UserRequiredLoggedInFirstException;
 use GuzzleHttp\Exception\GuzzleException;
+use Nette\Application\UI\InvalidLinkException;
 use Nette\Application\UI\Presenter;
 use Nette\Utils\Html;
 use Nette\Utils\JsonException;
 use Nette\Utils\Random;
-use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use RuntimeException;
 use Tracy\Debugger;
 use Tracy\ILogger;
@@ -21,6 +20,8 @@ use Tracy\ILogger;
 
 class TaskPresenter extends Presenter
 {
+    use LayoutTrait;
+
     /**
      * @var Todoist\ClientFactory
      */
@@ -50,8 +51,8 @@ class TaskPresenter extends Presenter
      * @param null|string $href
      * @param null|string $title
      * @param null|string $projectId
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Nette\Utils\JsonException
+     * @throws GuzzleException
+     * @throws JsonException
      */
     public function actionCreate(?string $href = null, ?string $title = null, ?string $projectId = null): void
     {
@@ -102,7 +103,7 @@ class TaskPresenter extends Presenter
 
 
     /**
-     * @throws \Nette\Application\UI\InvalidLinkException
+     * @throws InvalidLinkException
      */
     public function renderCreateError(): void
     {
@@ -117,7 +118,7 @@ class TaskPresenter extends Presenter
     /**
      * @throws GuzzleException
      * @throws JsonException
-     * @throws \Nette\Application\UI\InvalidLinkException
+     * @throws InvalidLinkException
      */
     public function renderCreateProjects(): void
     {
@@ -167,12 +168,12 @@ class TaskPresenter extends Presenter
      * @param string $content
      * @param null|int $projectId
      * @return int
-     * @throws \App\Model\AccessTokenNotFoundException
-     * @throws \App\Model\ApiOperationException
-     * @throws \App\Model\UserRequiredLoggedInFirstException
-     * @throws \Nette\Utils\JsonException
+     * @throws AccessTokenNotFoundException
+     * @throws ApiOperationException
+     * @throws UserRequiredLoggedInFirstException
+     * @throws JsonException
      * @throws RuntimeException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     private function createTask(string $content, ?int $projectId = null): int
     {

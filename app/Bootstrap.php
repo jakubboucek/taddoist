@@ -46,7 +46,7 @@ class Bootstrap
 
     protected static function setLogger(): void
     {
-// <Logger shitcode=true>
+        // <Logger shitcode=true>
         $logging = new LoggingClient(
             ['keyFilePath' => __DIR__ . '/Config/google-cloud-credentials.json']
         );
