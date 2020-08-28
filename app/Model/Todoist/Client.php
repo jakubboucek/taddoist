@@ -5,6 +5,7 @@ namespace App\Model\Todoist;
 
 use App\Model\ApiForbiddenException;
 use App\Model\ApiOperationException;
+use App\Model\Google\AppVersionProvider;
 use GuzzleHttp\RequestOptions;
 use Nette\Utils\Json;
 use Ramsey\Uuid\Uuid;
@@ -19,12 +20,13 @@ class Client
     private $client;
 
 
-    public function __construct(string $accessToken)
+    public function __construct(string $accessToken, AppVersionProvider $appVersionProvider)
     {
         $config = [
             'headers' => [
                 'Accept-Encoding' => 'gzip',
-                'Authorization' => sprintf('Bearer %s', $accessToken)
+                'Authorization' => sprintf('Bearer %s', $accessToken),
+                'User-Agent' => sprintf('Taddoist %s (https://taddoist.appspot.com)', $appVersionProvider->getVersion()),
             ],
             'base_uri' => 'https://api.todoist.com/rest/v1/',
             'http_errors' => false,

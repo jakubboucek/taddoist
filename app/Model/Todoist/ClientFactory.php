@@ -4,22 +4,22 @@ declare(strict_types=1);
 namespace App\Model\Todoist;
 
 use App\Model\AccessTokenNotFoundException;
+use App\Model\Google\AppVersionProvider;
 use App\Model\UserStorage;
 
 class ClientFactory
 {
-    /**
-     * @var UserStorage
-     */
+    /** @var UserStorage */
     private $userStorage;
 
+    /** @var AppVersionProvider */
+    private $versionProvider;
 
-    /**
-     * @param UserStorage $userStorage
-     */
-    public function __construct(UserStorage $userStorage)
+
+    public function __construct(UserStorage $userStorage, AppVersionProvider $versionProvider)
     {
         $this->userStorage = $userStorage;
+        $this->versionProvider = $versionProvider;
     }
 
 
@@ -36,6 +36,6 @@ class ClientFactory
             throw new AccessTokenNotFoundException('Access token not found');
         }
 
-        return new Client((string) $accessToken);
+        return new Client((string) $accessToken, $this->versionProvider);
     }
 }
