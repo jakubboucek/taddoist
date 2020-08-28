@@ -28,6 +28,7 @@ session:
 services:
 	- App\Model\Google\GoogleClientFactory(%google.credentialsFile%)
 	- App\Model\Google\Authenticator(%google-sign-in.clientId%, %google-sign-in.clientSecret%)
+	- App\Model\Google\AppVersionProvider
 	- App\Model\Todoist\Authenticator(%todoist.clientId%, %todoist.clientSecret%)
 	- App\Model\Todoist\ClientFactory
 	- App\Model\UserStorage

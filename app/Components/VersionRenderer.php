@@ -1,29 +1,29 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Components;
 
+use App\Model\Google\AppVersionProvider;
 use Nette\Application\UI\Control;
 
 class VersionRenderer extends Control
 {
-    protected const VERSION_ENV_KEY = 'GAE_VERSION';
-    protected const VERSION_UNKNOWN_VAL = '–';
+    private const VERSION_UNKNOWN_VAL = '<unknown>';
 
+    /** @var AppVersionProvider */
+    private $versionProvider;
+
+    public function __construct(AppVersionProvider $versionProvider)
+    {
+        $this->versionProvider = $versionProvider;
+        parent::__construct();
+    }
 
     public function render(): void
     {
-        echo $this->getVersion();
+        echo $this->versionProvider->getVersion() ?? self::VERSION_UNKNOWN_VAL;
     }
 
 
-    private function getVersion(): string
-    {
-        $version = getenv(self::VERSION_ENV_KEY);
-        if ($version === false) {
-            return self::VERSION_UNKNOWN_VAL;
-        }
-
-        return $version;
-    }
 }
