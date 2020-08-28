@@ -125,7 +125,7 @@ class TaskPresenter extends Presenter
             }
 
             $this->template->projectLinks = $links;
-            $this->template->title = $this->getHttpRequest()->getQuery('title', 'Bez popisu');
+            $this->template->title = $this->getHttpRequest()->getQuery('title') ?? 'Bez popisu';
         } catch (UserRequiredLoggedInFirstException $e) {
             $backlink = $this->storeRequest();
             $this->flashMessage(

@@ -23,7 +23,7 @@ class SignPresenter extends Presenter
     private const CSRF_TOKEN_COOKIE = 'taddoist-sign-csrf';
 
     /**
-     * @var null|string
+     * @var string|null
      * @persistent
      */
     public $backlink;
@@ -167,7 +167,10 @@ class SignPresenter extends Presenter
             'success'
         );
 
-        $this->restoreRequest($this->backlink);
+        if ($this->backlink !== null) {
+            $this->restoreRequest($this->backlink);
+        }
+
         $this->redirect('Site:');
     }
 

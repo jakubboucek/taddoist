@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model\Google;
 
+use JsonException;
 use Throwable;
 use Tracy\ILogger;
 
@@ -20,6 +21,7 @@ class Logger implements ILogger
     /**
      * @param $value
      * @param string $priority
+     * @throws JsonException
      */
     public function log($value, $priority = ILogger::INFO): void
     {
@@ -51,6 +53,11 @@ class Logger implements ILogger
         }
     }
 
+    /**
+     * @param $data
+     * @return array|false|string|null
+     * @throws JsonException
+     */
     private function prepareLogData($data)
     {
         $type = gettype($data);
@@ -62,7 +69,7 @@ class Logger implements ILogger
             case 'boolean':
             case 'integer':
             case 'double':
-                return json_encode($data);
+                return json_encode($data, JSON_THROW_ON_ERROR);
             case 'array':
                 return array_map([$this, 'prepareLogData'], $data);
         }

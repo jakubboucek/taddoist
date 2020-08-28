@@ -17,7 +17,6 @@ class VersionRenderer extends Control
     public function __construct(AppVersionProvider $versionProvider)
     {
         $this->versionProvider = $versionProvider;
-        parent::__construct();
     }
 
     public function render(): void
