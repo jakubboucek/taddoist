@@ -12,7 +12,7 @@ class TestPresenter extends Presenter
 {
     use LayoutTrait;
 
-    public function renderLog()
+    public function renderLog(): void
     {
         $logContent = Random::generate(30);
         Debugger::log($logContent);

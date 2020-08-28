@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Presenters;
 
-use App\Model\AuthorizationException;
 use App\Model\Google;
 use App\Model\Todoist;
-use App\Model\UserRequiredLoggedInFirstException;
 use App\Model\UserStorage;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\InvalidLinkException;
@@ -28,25 +27,16 @@ class SignPresenter extends Presenter
      * @persistent
      */
     public $backlink;
-    /**
-     * @var Todoist\Authenticator
-     */
+
+    /** @var Todoist\Authenticator */
     private $todoistAuthenticator;
-    /**
-     * @var Google\Authenticator
-     */
+
+    /** @var Google\Authenticator */
     private $googleAuthenticator;
-    /**
-     * @var UserStorage
-     */
+
+    /** @var UserStorage */
     private $userStorage;
 
-
-    /**
-     * @param Todoist\Authenticator $todoist
-     * @param Google\Authenticator $google
-     * @param UserStorage $userStorage
-     */
     public function __construct(
         Todoist\Authenticator $todoist,
         Google\Authenticator $google,
@@ -58,10 +48,6 @@ class SignPresenter extends Presenter
         parent::__construct();
     }
 
-
-    /**
-     *
-     */
     public function actionOut(): void
     {
         $this->user->logout(true);
@@ -70,7 +56,6 @@ class SignPresenter extends Presenter
 
         $this->redirect('Site:');
     }
-
 
     /**
      * @throws InvalidLinkException
@@ -90,16 +75,11 @@ class SignPresenter extends Presenter
         $this->redirectUrl($url);
     }
 
-
     /**
-     * @param null|string $state
-     * @param null|string $code
-     * @param null|string $error
-     * @return void
-     * @throws UserRequiredLoggedInFirstException
-     * @throws AuthorizationException
+     * @param string|null $state
+     * @param string|null $code
+     * @param string|null $error
      * @throws BadRequestException
-     * @throws RuntimeException
      */
     public function actionTodoistCallback(?string $state = null, ?string $code = null, ?string $error = null): void
     {
@@ -129,11 +109,9 @@ class SignPresenter extends Presenter
         $this->redirect('Site:');
     }
 
-
     /**
      * @param string $error
      * @throws BadRequestException
-     * @throws RuntimeException
      */
     private function handleTodoistError(string $error): void
     {
@@ -143,7 +121,6 @@ class SignPresenter extends Presenter
             throw new RuntimeException(sprintf('Todoist API returned error: "%s"', $error));
         }
     }
-
 
     /**
      * @throws InvalidLinkException
@@ -158,15 +135,13 @@ class SignPresenter extends Presenter
         $this->redirectUrl($url);
     }
 
-
     /**
-     * @param null|string $state
-     * @param null|string $code
-     * @param null|string $error
-     * @throws AuthorizationException
-     * @throws AuthenticationException
+     * @param string|null $state
+     * @param string|null $code
+     * @param string|null $error
      * @throws BadRequestException
-     * @throws RuntimeException
+     * @throws AuthenticationException
+     * @noinspection PhpUnused
      */
     public function actionGoogleCallback(?string $state = null, ?string $code = null, ?string $error = null): void
     {
@@ -184,13 +159,17 @@ class SignPresenter extends Presenter
 
         $this->removeCsrfToken();
 
-        $this->flashMessage(sprintf('Nyní jste přihlášeni pod e-mailem: %s, toto přihlášení by mělo zůstat aktivní 30 dní.',
-            $this->user->id), 'success');
+        $this->flashMessage(
+            sprintf(
+                'Nyní jste přihlášeni pod e-mailem: %s, toto přihlášení by mělo zůstat aktivní 30 dní.',
+                $this->user->id
+            ),
+            'success'
+        );
 
         $this->restoreRequest($this->backlink);
         $this->redirect('Site:');
     }
-
 
     /**
      * @param string $error
@@ -206,10 +185,6 @@ class SignPresenter extends Presenter
         }
     }
 
-
-    /**
-     * @return string
-     */
     private function createCsrfToken(): string
     {
         $token = Random::generate();
@@ -217,19 +192,11 @@ class SignPresenter extends Presenter
         return $token;
     }
 
-
-    /**
-     * @return string|null
-     */
     private function getCsrfToken(): ?string
     {
         return $this->getHttpRequest()->getCookie(static::CSRF_TOKEN_COOKIE);
     }
 
-
-    /**
-     *
-     */
     private function removeCsrfToken(): void
     {
         $this->getHttpResponse()->deleteCookie(static::CSRF_TOKEN_COOKIE);

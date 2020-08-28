@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Bookmarklet;
 
 use Nette\Utils\FileSystem;
 use Nette\Utils\Json;
+use Nette\Utils\JsonException;
 
 class Generator
 {
@@ -12,14 +14,12 @@ class Generator
     private const IDENTIFICATOR_PROJECT = '$__projectId__';
     private const IDENTIFICATOR_NEWWIN = '$__newWindow__';
 
-
     /**
      * @param string $endpoint
-     * @param null|string $projectId
+     * @param string|null $projectId
      * @param bool $newWindow
      * @return string
-     * @throws \Nette\Utils\JsonException
-     * @throws \Nette\IOException
+     * @throws JsonException
      */
     public static function generate(string $endpoint, ?string $projectId = null, bool $newWindow = true): string
     {
@@ -39,14 +39,8 @@ class Generator
         );
 
         return $bookmarklet;
-
     }
 
-
-    /**
-     * @return string
-     * @throws \Nette\IOException
-     */
     private static function getTemplate(): string
     {
         $fileName = __DIR__ . '/template.js';

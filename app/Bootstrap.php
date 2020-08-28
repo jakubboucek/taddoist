@@ -35,14 +35,12 @@ class Bootstrap
         return $configurator;
     }
 
-
     protected static function fixRealServerPort(): void
     {
         if (isset($_SERVER['GAE_SERVICE'])) {
             $_SERVER['SERVER_PORT'] = 443;
         }
     }
-
 
     protected static function setLogger(): void
     {

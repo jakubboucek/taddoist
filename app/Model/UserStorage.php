@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model;
 
 use Google\Cloud\Datastore\DatastoreClient;
+use Google\Cloud\Datastore\Key;
 use Nette\Security\User;
 use Nette\Utils\DateTime;
 
@@ -11,33 +13,18 @@ class UserStorage
 {
     private const NAMESPACE = 'UserSettings';
 
-    /**
-     * @var DatastoreClient
-     */
+    /** @var DatastoreClient */
     private $datastore;
-    /**
-     * @var User
-     */
+
+    /** @var User */
     private $user;
 
-
-    /**
-     * @param User $user
-     * @param DatastoreFactory $datastoreFactory
-     */
     public function __construct(User $user, DatastoreFactory $datastoreFactory)
     {
         $this->user = $user;
         $this->datastore = $datastoreFactory->create(static::NAMESPACE);
     }
 
-
-    /**
-     * @param string $key
-     * @param null|mixed $default
-     * @return null|mixed
-     * @throws UserRequiredLoggedInFirstException
-     */
     public function get(string $key, $default = null)
     {
         $entity = $this->datastore->lookup($this->getKey($key));
@@ -47,12 +34,6 @@ class UserStorage
         return $default;
     }
 
-
-    /**
-     * @param string $key
-     * @param mixed $value
-     * @throws UserRequiredLoggedInFirstException
-     */
     public function set(string $key, $value): void
     {
         $entity = $this->datastore->entity(
@@ -69,24 +50,13 @@ class UserStorage
         $this->datastore->upsert($entity);
     }
 
-
-    /**
-     * @param string $key
-     * @return \Google\Cloud\Datastore\Key
-     * @throws UserRequiredLoggedInFirstException
-     */
-    private function getKey(string $key): \Google\Cloud\Datastore\Key
+    private function getKey(string $key): Key
     {
         $kind = $this->getUserId();
 
         return $this->datastore->key($kind, $key);
     }
 
-
-    /**
-     * @return mixed
-     * @throws UserRequiredLoggedInFirstException
-     */
     private function getUserId()
     {
         if ($this->user->loggedIn !== true) {

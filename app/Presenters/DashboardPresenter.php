@@ -1,20 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Presenters;
 
 use App\Model\AccessTokenNotFoundException;
 use App\Model\ApiForbiddenException;
-use App\Model\ApiOperationException;
 use App\Model\Bookmarklet;
 use App\Model\Todoist;
 use App\Model\UserRequiredLoggedInFirstException;
 use GuzzleHttp\Exception\GuzzleException;
 use Nette\Application\UI\InvalidLinkException;
 use Nette\Application\UI\Presenter;
-use Nette\IOException;
 use Nette\Utils\JsonException;
-use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 use RuntimeException;
 use Tracy\Debugger;
 
@@ -23,30 +21,20 @@ class DashboardPresenter extends Presenter
 {
     use LayoutTrait;
 
-    /**
-     * @var Todoist\ClientFactory
-     */
+    /** @var Todoist\ClientFactory */
     private $todoistClientFactory;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $projects;
 
-
-    /**
-     * @param Todoist\ClientFactory $todoistClientFactory
-     */
     public function __construct(Todoist\ClientFactory $todoistClientFactory)
     {
         $this->todoistClientFactory = $todoistClientFactory;
         parent::__construct();
     }
 
-
     /**
      * @throws JsonException
-     * @throws RuntimeException
      * @throws GuzzleException
      */
     protected function startup(): void
@@ -74,7 +62,6 @@ class DashboardPresenter extends Presenter
         parent::startup();
     }
 
-
     /**
      * @throws JsonException
      * @throws RuntimeException
@@ -88,22 +75,14 @@ class DashboardPresenter extends Presenter
             $links[] = [$project['name'], $this->getBookmarklet((string)$project['id'])];
         }
 
-
         $this->template->baseLink = $this->getBookmarklet();
         $this->template->projectLinks = $links;
     }
 
-
     /**
      * @return array
-     * @throws AccessTokenNotFoundException
-     * @throws ApiForbiddenException
      * @throws JsonException
-     * @throws RuntimeException
-     * @throws UserRequiredLoggedInFirstException
-     * @throws ApiOperationException
      * @throws GuzzleException
-     * @throws UnsatisfiedDependencyException
      */
     private function findProjects(): array
     {
@@ -111,12 +90,10 @@ class DashboardPresenter extends Presenter
         return $todoist->findProjects();
     }
 
-
     /**
-     * @param null|string $projectId
+     * @param string|null $projectId
      * @return string
      * @throws InvalidLinkException
-     * @throws IOException
      * @throws JsonException
      */
     private function getBookmarklet(?string $projectId = null): string

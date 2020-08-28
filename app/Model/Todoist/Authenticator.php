@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Todoist;
@@ -21,15 +22,11 @@ class Authenticator
 
     public const SCOPE = 'data:read_write';
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $clientId;
-    /**
-     * @var string
-     */
-    private $clientSecret;
 
+    /** @var string */
+    private $clientSecret;
 
     public function __construct(string $clientId, string $clientSecret)
     {
@@ -37,13 +34,13 @@ class Authenticator
         $this->clientSecret = $clientSecret;
     }
 
-
     /**
      * Step 1. - redirect user to API for grant permissions
      * @param string $csrfToken Generated CSRF token
      * @param array $stateData Data to
+     * @param string|null $redirect_uri
      * @return string
-     * @throws \Nette\Utils\JsonException
+     * @throws JsonException
      */
     public function getLoginUrl(string $csrfToken, array $stateData = [], ?string $redirect_uri = null): string
     {
@@ -65,7 +62,6 @@ class Authenticator
         return sprintf('%s?%s', static::API_AUTH_URL, http_build_query($params));
     }
 
-
     /**
      * Step 2. - process params returned from API
      * @param string $csrfToken Generated CSRF token for validation (must be same as in `getLoginUrl()`)
@@ -73,7 +69,7 @@ class Authenticator
      * @param string $urlState State parametr from URL
      * @return AuthorizationResponse
      * @throws AuthorizationException
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function getAccessToken(string $csrfToken, string $urlCode, string $urlState): AuthorizationResponse
     {
@@ -82,7 +78,6 @@ class Authenticator
 
         return new AuthorizationResponse($accessToken, $state);
     }
-
 
     /**
      * @param string $serializedState Encoded state from URL
@@ -97,14 +92,23 @@ class Authenticator
 
             if (!isset($state['csrf']) || $state['csrf'] !== $csrfToken) {
                 $csrf = $state['csrf'] ?? 'parameter undefined';
-                throw new CsrfProtectionFailedException(sprintf('CRSF token mismatched ("%s" vs "%s")', $csrf,
-                    $csrfToken));
+                throw new CsrfProtectionFailedException(
+                    sprintf(
+                        'CRSF token mismatched (\'%s\' vs \'%s\')',
+                        $csrf,
+                        $csrfToken
+                    )
+                );
             }
 
-            if (!isset($state['data']) || !\is_array($state['data'])) {
-                $msg = isset($state['data']) ? \gettype($state['data']) : 'undefined';
-                throw new InvalidStateException(sprintf('State\'s parametr "data" should be type array, %s instead.',
-                    $msg));
+            if (isset($state['data']) === false || is_array($state['data']) === false) {
+                $msg = isset($state['data']) ? gettype($state['data']) : 'undefined';
+                throw new InvalidStateException(
+                    sprintf(
+                        'State\'s parametr \'data\' should be type array, %s instead.',
+                        $msg
+                    )
+                );
             }
 
             return $state['data'];
@@ -112,7 +116,6 @@ class Authenticator
             throw new InvalidStateException('Unable to decode State parameter', $e->getCode(), $e);
         }
     }
-
 
     /**
      * @param string $code
@@ -130,9 +133,12 @@ class Authenticator
         $client = new Client();
 
         try {
-            $response = $client->post(static::API_EXCHANGE_URL, [
-                'form_params' => $request,
-            ]);
+            $response = $client->post(
+                static::API_EXCHANGE_URL,
+                [
+                    'form_params' => $request,
+                ]
+            );
 
             $array = Json::decode($response->getBody()->getContents(), Json::FORCE_ARRAY);
 
@@ -141,7 +147,7 @@ class Authenticator
             }
 
             return $array['access_token'];
-        } catch (GuzzleException $e) {
+        } /** @noinspection PhpRedundantCatchClauseInspection */ catch (GuzzleException $e) {
             throw new TokenExchangeException('Error during call API', $e->getCode(), $e);
         } catch (JsonException $e) {
             throw new TokenExchangeException('API response is invalid JSON', $e->getCode(), $e);

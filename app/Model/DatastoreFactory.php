@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model;
@@ -12,18 +13,13 @@ class DatastoreFactory
      */
     private $googleCredentialsFilename;
 
-
-    /**
-     * @param string $googleCredentialsFilename
-     */
     public function __construct(string $googleCredentialsFilename)
     {
         $this->googleCredentialsFilename = $googleCredentialsFilename;
     }
 
-
     /**
-     * @param string $namespace Partitions data under a namespace. Useful for Multitenant Projects.
+     * @param string|null $namespace Partitions data under a namespace. Useful for Multitenant Projects.
      * @return DatastoreClient
      */
     public function create(?string $namespace = null): DatastoreClient
@@ -32,7 +28,7 @@ class DatastoreFactory
             'keyFilePath' => $this->googleCredentialsFilename,
         ];
 
-        if($namespace) {
+        if ($namespace) {
             $config['namespaceId'] = $namespace;
         }
 

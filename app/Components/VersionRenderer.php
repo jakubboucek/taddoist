@@ -24,6 +24,4 @@ class VersionRenderer extends Control
     {
         echo $this->versionProvider->getVersion() ?? self::VERSION_UNKNOWN_VAL;
     }
-
-
 }

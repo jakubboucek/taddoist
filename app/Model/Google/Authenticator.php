@@ -1,42 +1,42 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model\Google;
 
-use App\Model\AuthorizationException;
 use App\Model\CsrfProtectionFailedException;
 use App\Model\Helpers;
 use App\Model\InvalidStateException;
+use Google_Client;
+use Google_Exception;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 
 class Authenticator
 {
-    /**
-     * @var \Google_Client
-     */
+    /** @var Google_Client */
     private $client;
-
 
     /**
      * @param string $clientId
      * @param string $clientSecret
      * @param GoogleClientFactory $googleClientFactory
-     * @throws \Google_Exception
+     * @throws Google_Exception
      */
     public function __construct(string $clientId, string $clientSecret, GoogleClientFactory $googleClientFactory)
     {
-        $this->client = $googleClientFactory->create([
-            'client_id' => $clientId,
-            'client_secret' => $clientSecret,
-        ]);
+        $this->client = $googleClientFactory->create(
+            [
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+            ]
+        );
     }
-
 
     /**
      * @param string $csrfToken
      * @param array $stateData
-     * @param null|string $redirect_uri
+     * @param string|null $redirect_uri
      * @return string
      * @throws JsonException
      */
@@ -55,14 +55,6 @@ class Authenticator
         return $this->client->createAuthUrl();
     }
 
-
-    /**
-     * @param string $csrfToken
-     * @param string $urlCode
-     * @param string $urlState
-     * @return AuthorizationResponse
-     * @throws AuthorizationException
-     */
     public function getAccessToken(string $csrfToken, string $urlCode, string $urlState): AuthorizationResponse
     {
         [$state, $redirect_uri] = $this->decodeState($urlState, $csrfToken);
@@ -76,12 +68,10 @@ class Authenticator
         return new AuthorizationResponse($accessToken, $state, $idToken);
     }
 
-
     /**
      * @param string $serializedState Encoded state from URL
      * @param string $csrfToken CSRF token for validation
      * @return array
-     * @throws AuthorizationException
      */
     private function decodeState(string $serializedState, string $csrfToken): array
     {
@@ -90,14 +80,23 @@ class Authenticator
 
             if (!isset($state['csrf']) || $state['csrf'] !== $csrfToken) {
                 $csrf = $state['csrf'] ?? 'parameter undefined';
-                throw new CsrfProtectionFailedException(sprintf('CRSF token mismatched ("%s" vs "%s")', $csrf,
-                    $csrfToken));
+                throw new CsrfProtectionFailedException(
+                    sprintf(
+                        'CRSF token mismatched (\'%s\' vs \'%s\')',
+                        $csrf,
+                        $csrfToken
+                    )
+                );
             }
 
-            if (!isset($state['data']) || !\is_array($state['data'])) {
-                $msg = isset($state['data']) ? \gettype($state['data']) : 'undefined';
-                throw new InvalidStateException(sprintf('State\'s parametr "data" should be type array, %s instead.',
-                    $msg));
+            if (isset($state['data']) === false || is_array($state['data']) === false) {
+                $msg = isset($state['data']) ? gettype($state['data']) : 'undefined';
+                throw new InvalidStateException(
+                    sprintf(
+                        'State\'s parametr \'data\' should be type array, %s instead.',
+                        $msg
+                    )
+                );
             }
 
             return [

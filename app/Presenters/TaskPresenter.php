@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Presenters;
 
 use App\Model\AccessTokenNotFoundException;
-use App\Model\ApiOperationException;
 use App\Model\Todoist;
 use App\Model\UserRequiredLoggedInFirstException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -22,11 +22,8 @@ class TaskPresenter extends Presenter
 {
     use LayoutTrait;
 
-    /**
-     * @var Todoist\ClientFactory
-     */
+    /** @var Todoist\ClientFactory */
     private $todoistClientFactory;
-
 
     public function __construct(Todoist\ClientFactory $todoistClientFactory)
     {
@@ -34,9 +31,6 @@ class TaskPresenter extends Presenter
         $this->todoistClientFactory = $todoistClientFactory;
     }
 
-
-    /**
-     */
     protected function startup(): void
     {
         if ($this->user->loggedIn !== true) {
@@ -46,11 +40,10 @@ class TaskPresenter extends Presenter
         parent::startup();
     }
 
-
     /**
-     * @param null|string $href
-     * @param null|string $title
-     * @param null|string $projectId
+     * @param string|null $href
+     * @param string|null $title
+     * @param string|null $projectId
      * @throws GuzzleException
      * @throws JsonException
      */
@@ -61,12 +54,11 @@ class TaskPresenter extends Presenter
             $this->redirect('Site:');
         }
 
-        if($projectId === null) {
+        if ($projectId === null) {
             $this->forward('createProjects', $this->getHttpRequest()->getQuery());
         }
 
-        /** @noinspection IsEmptyFunctionUsageInspection */
-        $content = !empty($title) ? sprintf('[%s](%s)', $title, $href) : $href;
+        $content = empty($title) === false ? sprintf('[%s](%s)', $title, $href) : $href;
 
         try {
             $id = $this->createTask($content, (int)$projectId);
@@ -101,7 +93,6 @@ class TaskPresenter extends Presenter
         }
     }
 
-
     /**
      * @throws InvalidLinkException
      */
@@ -114,11 +105,10 @@ class TaskPresenter extends Presenter
         $this->template->retryLink = $this->link('create', $queries);
     }
 
-
     /**
      * @throws GuzzleException
-     * @throws JsonException
      * @throws InvalidLinkException
+     * @throws JsonException
      */
     public function renderCreateProjects(): void
     {
@@ -130,7 +120,7 @@ class TaskPresenter extends Presenter
             $projects = $this->todoistClientFactory->create()->findProjects();
 
             foreach ($projects as $project) {
-                $link = $this->link('create', $parameters + ['projectId'=> $project['id']]);
+                $link = $this->link('create', $parameters + ['projectId' => $project['id']]);
                 $links[] = [$project['name'], $link];
             }
 
@@ -163,17 +153,12 @@ class TaskPresenter extends Presenter
         }
     }
 
-
     /**
      * @param string $content
-     * @param null|int $projectId
+     * @param int|null $projectId
      * @return int
-     * @throws AccessTokenNotFoundException
-     * @throws ApiOperationException
-     * @throws UserRequiredLoggedInFirstException
-     * @throws JsonException
-     * @throws RuntimeException
      * @throws GuzzleException
+     * @throws JsonException
      */
     private function createTask(string $content, ?int $projectId = null): int
     {
@@ -182,5 +167,4 @@ class TaskPresenter extends Presenter
 
         return $response['id'];
     }
-
 }

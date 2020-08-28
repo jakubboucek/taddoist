@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Model;
@@ -12,7 +13,7 @@ class Authenticator implements NS\IAuthenticator
     public function authenticate(array $credentials): NS\IIdentity
     {
         [$authentication] = $credentials;
-        if(!$authentication instanceof AuthorizationResponse) {
+        if (!$authentication instanceof AuthorizationResponse) {
             throw new InvalidArgumentException('Only allowed authenticator is class: ' . AuthorizationResponse::class);
         }
 
