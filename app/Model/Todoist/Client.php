@@ -26,7 +26,7 @@ class Client
                 'Accept-Encoding' => 'gzip',
                 'Authorization' => sprintf('Bearer %s', $accessToken)
             ],
-            'base_uri' => 'https://beta.todoist.com/API/v8/',
+            'base_uri' => 'https://api.todoist.com/rest/v1/',
             'http_errors' => false,
             'timeout' => 5
         ];
