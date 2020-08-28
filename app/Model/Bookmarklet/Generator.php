@@ -16,6 +16,7 @@ class Generator
     /**
      * @param string $endpoint
      * @param null|string $projectId
+     * @param bool $newWindow
      * @return string
      * @throws \Nette\Utils\JsonException
      * @throws \Nette\IOException

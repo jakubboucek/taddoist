@@ -2,17 +2,16 @@
     const builder = new URL(endpoint);
     const params = builder.searchParams;
 
-    params.append('href', location.href);
-    params.append('title', document.title);
+    params.set('href', location.href);
+    params.set('title', document.title);
     if (projectId) {
-        params.append('projectId', projectId);
+        params.set('projectId', projectId);
     }
 
     if (newWindow) {
         window.open(builder.href, 'taddoist')
     } else {
-        location.href = builder.href;
+        location.assign(builder.toString());
     }
-
 
 })(location, $__endpoint__, $__projectId__, $__newWindow__);
